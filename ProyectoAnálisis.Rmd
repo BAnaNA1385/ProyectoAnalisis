@@ -1,9 +1,12 @@
----
+--- 
 title: "Proyecto Análisis"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
 author: "Maddi Casaiz y Ana Díaz"
 date: "`r Sys.Date()`"
----
+--- 
 
 
 ```{r include=FALSE}
@@ -47,24 +50,47 @@ datos$tmed <- parse_number(datos$tmed) / 10
 
 datos <- datos[!is.na(datos$tmin) & !is.na(datos$tmed) & !is.na(datos$tmax), ]
 ```
+#Evolución de las temperaturas a lo largo de los años 
 
 Regresión lineal de las temperaturas desde 2000
 
 ```{r}
 
-modelo  <- lm(tmax ~ año, data = datos)
+modelo  <- lm(tmed ~ año, data = datos)
 coef = coefficients(modelo)
-recta = coef[1] + seq(2000,2025,1)* coef[2]
-
-plot(dias_tmax_mayor_30 ~ año, data = extremos_por_año,
+recta1 = coef[1] + seq(2000,2025,1)* coef[2]
+x <- seq(2000,2025,1)
+plot(tmed ~ año, data = datos,
         ylab="Temperatura máxima (°C)",
         xlab="Año",
         main="Temperaturas diarias")
+
+lines(x, recta1)
 ```
 
 Añadamos a esta gráfica las temperaturas mínimas y la temperatura media
 
 ```{r}
+modelo2  <- lm(tmin ~ año, data = datos)
+coef2 = coefficients(modelo2)
+recta2 = coef2[1] + seq(2000,2025,1)* coef2[2]
 
+lines(x, recta2)
+
+modelo3  <- lm(tmin ~ año, data = datos)
+coef3 = coefficients(modelo3)
+recta3 = coef3[1] + seq(2000,2025,1)* coef3[2]
+
+lines(x, recta3)
+```
+
+
+#Relacion entre las medias de temperatura alta y baja
+
+```{r}
+boxplot(tmax ~ tmin, data = datos)
+t.test(tmax ~ tmin, data = datos, paired = True)
 
 ```
+
+
