@@ -160,3 +160,5 @@ plot(horatmax ~ fecha_num, data = datos,
         main="Temperaturas diarias")
 lines(x, recta1)
 ```
+
+Comparamos las coef[2] de cada una de ellas (la pendiente)
