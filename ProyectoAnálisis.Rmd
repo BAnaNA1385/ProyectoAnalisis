@@ -122,6 +122,7 @@ lines(x, recta1)
 
 ```
 En otoño
+
 ```{r}
 modelo  <- lm(horatmax ~ fecha_num, data = which(datos$estacion == 'otoño')
 coef = coefficients(modelo)
