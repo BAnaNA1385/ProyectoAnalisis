@@ -49,6 +49,7 @@ datos$tmin <- parse_number(datos$tmin) / 10
 datos$tmed <- parse_number(datos$tmed) / 10
 
 datos <- datos[!is.na(datos$tmin) & !is.na(datos$tmed) & !is.na(datos$tmax), ]
+datos$fecha_num <- lubridate::decimal_date(datos$fecha)
 ```
 #Evolución de las temperaturas a lo largo de los años 
 
@@ -56,28 +57,34 @@ Regresión lineal de las temperaturas desde 2000
 
 ```{r}
 
-modelo  <- lm(tmed ~ año, data = datos)
+
+
+
+
+
+modelo <- lm(tmed ~ fecha_num, data = datos)
 coef = coefficients(modelo)
 recta1 = coef[1] + seq(2000,2025,1)* coef[2]
 x <- seq(2000,2025,1)
-plot(tmed ~ año, data = datos,
+plot(tmed ~ fecha_num, data = datos,
         ylab="Temperatura máxima (°C)",
         xlab="Año",
         main="Temperaturas diarias")
 
 lines(x, recta1)
+
 ```
 
 Añadamos a esta gráfica las temperaturas mínimas y la temperatura media
 
 ```{r}
-modelo2  <- lm(tmin ~ año, data = datos)
+modelo2  <- lm(tmin ~ fecha_num, data = datos)
 coef2 = coefficients(modelo2)
 recta2 = coef2[1] + seq(2000,2025,1)* coef2[2]
 
 lines(x, recta2)
 
-modelo3  <- lm(tmin ~ año, data = datos)
+modelo3  <- lm(tmin ~ fecha_num, data = datos)
 coef3 = coefficients(modelo3)
 recta3 = coef3[1] + seq(2000,2025,1)* coef3[2]
 
@@ -89,12 +96,67 @@ lines(x, recta3)
 
 ```{r}
 boxplot(tmax ~ tmin, data = datos)
-t.test(tmax ~ tmin, data = datos, paired = True)
-
+t.test(datos$tmax, datos$tmin, paired = True)
 
 ```
 
-
 #¿El calentamiento afecta a todas las estaciones por igual?
+```{r}
+#test anova de las distintas estaciones
+boxplot(tmed ~ estacion, data = datos)
+```
 
-boxplot(x,y)
+#Variabilidad por estaciones de hora de temperatura máxima y mínima
+
+En verano
+```{r}
+modelo  <- lm(horatmax ~ fecha_num, data = which(datos$estacion == 'verano')
+coef = coefficients(modelo)
+recta1 = coef[1] + seq(2000,2025,1)* coef[2]
+x <- seq(2000,2025,1)
+plot(horatmax ~ fecha_num, data = datos,
+        ylab="Temperatura máxima (°C)",
+        xlab="Año",
+        main="Temperaturas diarias")
+lines(x, recta1)
+
+```
+En otoño
+```{r}
+modelo  <- lm(horatmax ~ fecha_num, data = which(datos$estacion == 'otoño')
+coef = coefficients(modelo)
+recta1 = coef[1] + seq(2000,2025,1)* coef[2]
+x <- seq(2000,2025,1)
+plot(horatmax ~ fecha_num, data = datos,
+        ylab="Temperatura máxima (°C)",
+        xlab="Año",
+        main="Temperaturas diarias")
+lines(x, recta1)
+
+```
+En invierno
+```{r}
+modelo  <- lm(horatmax ~ fecha_num, data = which(datos$estacion == 'invierno')
+coef = coefficients(modelo)
+recta1 = coef[1] + seq(2000,2025,1)* coef[2]
+x <- seq(2000,2025,1)
+plot(horatmax ~ fecha_num, data = datos,
+        ylab="Temperatura máxima (°C)",
+        xlab="Año",
+        main="Temperaturas diarias")
+lines(x, recta1)
+
+```
+
+En primavera
+```{r}
+modelo  <- lm(horatmax ~ fecha_num, data = which(datos$estacion == 'oprimavera')
+coef = coefficients(modelo)
+recta1 = coef[1] + seq(2000,2025,1)* coef[2]
+x <- seq(2000,2025,1)
+plot(horatmax ~ fecha_num, data = datos,
+        ylab="Temperatura máxima (°C)",
+        xlab="Año",
+        main="Temperaturas diarias")
+lines(x, recta1)
+```
