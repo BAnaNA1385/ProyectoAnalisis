@@ -97,4 +97,4 @@ t.test(tmax ~ tmin, data = datos, paired = True)
 
 #¿El calentamiento afecta a todas las estaciones por igual?
 
-boxplot(x,y)
+BUENAS
