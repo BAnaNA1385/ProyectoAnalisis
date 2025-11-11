@@ -1,5 +1,70 @@
 ---
-title: "ProyectoAnálisis"
+title: "Proyecto Análisis"
 output: html_document
+author: "Maddi Casaiz y Ana Díaz"
+date: "`r Sys.Date()`"
 ---
 
+
+```{r include=FALSE}
+library(sf)
+library(ggplot2)
+library(leaflet)
+library(osmdata)
+library(dplyr)
+library(readr)
+library(lubridate)
+
+```
+
+Importar y preparar la base de datos para el estudio que queremos realizar
+
+```{r}
+datos <- read_csv("aemet_datos_diarios.csv")
+datos$fecha <- as.Date(datos$fecha, format="%Y-%m-%d")
+datos$año <- year(datos$fecha)
+datos$mes <- month(datos$fecha)
+estaciones <- c()
+
+for (mes in datos$mes) {
+  if (mes >= 3 && mes <= 5) {
+    estaciones <- c(estaciones, 'primavera')
+  } else if (mes >= 6 && mes <= 8) {
+    estaciones <- c(estaciones, 'verano')
+  } else if (mes >= 9 && mes <= 11) {
+    estaciones <- c(estaciones, 'otoño')
+  } else {
+    estaciones <- c(estaciones, 'invierno')
+  }
+}
+datos$estacion <- estaciones
+datos$tmax <- as.character(datos$tmax)
+datos$tmin <- as.character(datos$tmin)
+datos$tmed <- as.character(datos$tmed)
+datos$tmax <- parse_number(datos$tmax) / 10  
+datos$tmin <- parse_number(datos$tmin) / 10
+datos$tmed <- parse_number(datos$tmed) / 10
+
+datos <- datos[!is.na(datos$tmin) & !is.na(datos$tmed) & !is.na(datos$tmax), ]
+```
+
+Regresión lineal de las temperaturas desde 2000
+
+```{r}
+
+modelo  <- lm(tmax ~ año, data = datos)
+coef = coefficients(modelo)
+recta = coef[1] + seq(2000,2025,1)* coef[2]
+
+plot(dias_tmax_mayor_30 ~ año, data = extremos_por_año,
+        ylab="Temperatura máxima (°C)",
+        xlab="Año",
+        main="Temperaturas diarias")
+```
+
+Añadamos a esta gráfica las temperaturas mínimas y la temperatura media
+
+```{r}
+
+
+```
