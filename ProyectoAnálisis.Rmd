@@ -104,6 +104,7 @@ t.test(datos$tmax, datos$tmin, paired = True)
 ```{r}
 #test anova de las distintas estaciones
 boxplot(tmed ~ estacion, data = datos)
+
 ```
 
 #Variabilidad por estaciones de hora de temperatura máxima y mínima
@@ -161,5 +162,16 @@ plot(horatmax ~ fecha_num, data = datos,
         main="Temperaturas diarias")
 lines(x, recta1)
 ```
-
 Comparamos las coef[2] de cada una de ellas (la pendiente)
+Veamos ahora si la diferencia de medias de horas máximas entre el primer y último año son estadísticamente significativas
+
+````{r}`
+datos_ultimo = which(datos, datos$año == 2024)
+datos_primero = which(datos, datos$año == 2000)
+t.test(datos_primero$horatmax, datos_ultimo$horatmax)
+```
+
+#tendencias de precipitaciones e inundaciones
+```{r}
+
+```
