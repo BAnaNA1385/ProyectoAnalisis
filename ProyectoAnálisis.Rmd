@@ -196,3 +196,4 @@ modelFinal <- lm(formula, data = datos)
 summary(modelFinal)
 vif(modelFinal)
 ```
+#Como podemos ver por el VIF las variables están poco correlacionadas entre sí. Es decir Step AIC ha funcionado correctamente para eliminar las variables que estaban correlacionadas.
