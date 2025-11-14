@@ -51,6 +51,7 @@ datos$tmed <- parse_number(datos$tmed) / 10
 datos <- datos[!is.na(datos$tmin) & !is.na(datos$tmed) & !is.na(datos$tmax), ]
 datos$fecha_num <- lubridate::decimal_date(datos$fecha)
 ```
+###1###
 #Evolución de las temperaturas a lo largo de los años 
 
 Regresión lineal de las temperaturas desde 2000
@@ -91,7 +92,7 @@ recta3 = coef3[1] + seq(2000,2025,1)* coef3[2]
 lines(x, recta3)
 ```
 
-
+###2###
 #Relacion entre las medias de temperatura alta y baja
 
 ```{r}
@@ -99,14 +100,14 @@ boxplot(tmax ~ tmin, data = datos)
 t.test(datos$tmax, datos$tmin, paired = True)
 
 ```
-
+###3###
 #¿El calentamiento afecta a todas las estaciones por igual?
 ```{r}
 #test anova de las distintas estaciones
 boxplot(tmed ~ estacion, data = datos)
 
 ```
-
+###4###
 #Variabilidad por estaciones de hora de temperatura máxima y mínima
 
 En verano
@@ -165,13 +166,33 @@ lines(x, recta1)
 Comparamos las coef[2] de cada una de ellas (la pendiente)
 Veamos ahora si la diferencia de medias de horas máximas entre el primer y último año son estadísticamente significativas
 
-````{r}`
+```{r}
 datos_ultimo = which(datos, datos$año == 2024)
 datos_primero = which(datos, datos$año == 2000)
 t.test(datos_primero$horatmax, datos_ultimo$horatmax)
 ```
-
-#tendencias de precipitaciones e inundaciones
+###5###
+#Regresión lineal múltiple para predecir la temperatura máxima diaria
 ```{r}
+pairs(~tmax+tmin+tmed+año+mes+horatmax+horatmin+prec+velmedia+presmin+presmax+hrMedia, data=datos, pch = 16, cex = 0.5)
+modelo_mult <- lm(tmax ~ tmin + tmed + año + mes + horatmax + horatmin + prec + velmedia + presmin + presmax + hrMedia, data = datos)
+summary(modelo_mult)
+vif(modelo_mult)
+```
 
+```{r}
+pairs(~tmax+tmin+tmed+año+mes+horatmax+horatmin+prec+velmedia+presmin+presmax+hrMedia, data=datos, pch = 16, cex = 0.5)
+modelo_mult <- lm(tmax ~ tmin + tmed + año + mes + horatmax + horatmin + prec + velmedia + presmin + presmax + hrMedia, data = datos)
+summary(modelo_mult)
+vif(modelo_mult)
+```
+
+```{r}
+fit1  <- lm(tmax ~ ., data = datos)
+fit2 <- lm(tmax ~ 1, data = datos)
+modelAIC <- step(fit2, scope = list(lower=fit2, upper=fit1), direction="forward")
+formula <- formula(modelAIC)
+modelFinal <- lm(formula, data = datos)
+summary(modelFinal)
+vif(modelFinal)
 ```
