@@ -287,3 +287,137 @@ boxplot(tmax ~ tmin, data = datos2)
 t.test(datos2$tmax, datos2$tmin, paired = TRUE)
 
 ```
+#APARTADO 7
+#Determina por qué hay diferencias
+
+#Base de datos combinada
+# APARTADO 7: Preparación de datos combinados - SOLUCIÓN DEFINITIVA
+
+# 1. EXCLUIR COLUMNAS PROBLEMÁTICAS Y MANTENER SOLO LAS NECESARIAS
+columnas_analisis <- c(
+  "fecha",      # Fecha
+  "tmed",       # Temperatura media
+  "prec",       # Precipitación
+  "tmin",       # Temperatura mínima
+  "horatmin",   # Hora temperatura mínima
+  "tmax",       # Temperatura máxima
+  "horatmax",   # Hora temperatura máxima
+  "dir",        # Dirección del viento
+  "velmedia",   # Velocidad media del viento
+  "racha",      # Ráfaga máxima
+  "sol",        # Horas de sol
+  "presMax",    # Presión máxima
+  "presMin",    # Presión mínima
+  "hrMin",      # Humedad relativa mínima
+  "hrMax",      # Humedad relativa máxima
+  "mes",        # Mes (a extraer de fecha)
+  "año"         # Año (a extraer de fecha)
+)
+
+# Verificar qué columnas existen en ambas bases
+columnas_en_datos <- intersect(columnas_analisis, names(datos))
+columnas_en_datos2 <- intersect(columnas_analisis, names(datos2))
+
+# Columnas comunes que usaremos
+columnas_comunes <- intersect(columnas_en_datos, columnas_en_datos2)
+cat("Columnas comunes para el análisis:", columnas_comunes, "\n")
+
+# 2. PREPARAR CADA BASE DE DATOS POR SEPARADO
+# San Sebastián
+datos_ss <- datos %>%
+  select(all_of(columnas_comunes)) %>%
+  mutate(
+    fecha = as.Date(fecha),
+    año = year(fecha),
+    mes = month(fecha),
+    tipo_ciudad = "San Sebastian"
+  )
+
+# Pamplona
+datos_pam <- datos2 %>%
+  select(all_of(columnas_comunes)) %>%
+  mutate(
+    fecha = as.Date(fecha),
+    año = year(fecha), 
+    mes = month(fecha),
+    tipo_ciudad = "Pamplona"
+  )
+
+# 3. VERIFICAR ESTRUCTURAS ANTES DE COMBINAR
+cat("Estructura de datos_ss:\n")
+str(datos_ss)
+cat("\nEstructura de datos_pam:\n")
+str(datos_pam)
+
+# 4. COMBINAR LAS BASES DE DATOS
+datos_combinados <- bind_rows(datos_ss, datos_pam) %>%
+  mutate(
+    tipo_ciudad = as.factor(tipo_ciudad),
+    estacion = as.factor(estacion)
+  )
+
+# 5. LIMPIEZA DE DATOS FALTANTES EN VARIABLES CLAVE
+datos_combinados_clean <- datos_combinados %>%
+  filter(
+    !is.na(tmax) & !is.na(tmin) & !is.na(tmed),
+    !is.na(tipo_ciudad)
+  )
+
+cat("Filas después de limpiar NAs:", nrow(datos_combinados_clean), "\n")
+
+#¿Qué parámetros son significativos en una ciudad pero no en la otra?
+
+datos$estacion <- factor(datos$estacion)
+modelo_sanse <- lm(tmed ~ tmax + tmin + hrMedia + año + mes, data = datos)
+coefs1 = summary(modelo_sanse)$coefficients 
+coeficientes_significativos_sanse <- coefs[coefs[,4] < 0.05, ]
+
+datos2$estacion <- factor(datos2$estacion)
+modelo_pamp <- lm(tmed ~ tmax + tmin + hrMedia + año + mes, data = datos)
+coefs2 = summary(modelo_pamp)$coefficients 
+coeficientes_significativos_pamp <- coefs[coefs[,4] < 0.05, ]
+
+#Cuantificar CUÁNTO importa globalmente ser costera/interior
+# Modelo sin factor ciudad
+modelo_sin_ciudad <- lm(tmax ~ ., data = datos_combinados %>% select(tmax, all_of(predictores)))
+
+# Modelo con factor ciudad (sin interacciones)
+modelo_con_ciudad <- lm(tmax ~ . + tipo_ciudad, data = datos_combinados %>% select(tmax, all_of(predictores), tipo_ciudad))
+
+# Comparación de modelos
+t.test(modelo_sin_ciudad, modelo_con_ciudad)
+
+# Cálculo de varianza explicada
+r2_sin <- summary(modelo_sin_ciudad)$r.squared
+r2_con <- summary(modelo_con_ciudad)$r.squared
+varianza_explicada <- r2_con - r2_sin
+
+#donde y como se manifiestan esas diferencias
+# Modelo con interacciones completas
+modelo_interacciones <- lm(
+  tmax ~ (.) * tipo_ciudad, 
+  data = datos_combinados %>% select(tmax, all_of(predictores), tipo_ciudad)
+)
+
+# Resumen de interacciones significativas
+summary(modelo_interacciones)
+
+# Extraer coeficientes de interacción
+coef_interacciones <- tidy(modelo_interacciones) %>%
+  filter(str_detect(term, "tipo_ciudad"))
+
+#cuantificar exactamente cuanto difieren los efectos (matriz de contrastes)
+
+library(multcomp)
+
+# Contrastes específicos para parámetros clave
+contrastes <- matrix(c(
+  # Contraste 1: ¿El efecto de la humedad es igual en ambos tipos?
+  0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0,  # humedad + humedad:tipo_ciudad = 0?
+  # Contraste 2: ¿El efecto del viento es igual?
+  0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0   # viento + viento:tipo_ciudad = 0?
+), nrow = 2, byrow = TRUE)
+
+prueba_contrastes <- glht(modelo_interacciones, linfct = contrastes)
+summary(prueba_contrastes)
+
