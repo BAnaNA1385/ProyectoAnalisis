@@ -197,3 +197,93 @@ summary(modelFinal)
 vif(modelFinal)
 ```
 #Como podemos ver por el VIF las variables están poco correlacionadas entre sí. Es decir Step AIC ha funcionado correctamente para eliminar las variables que estaban correlacionadas.
+
+###6###
+
+```{r}
+#Preparar los datos para su uso
+datos2 = read.csv("aemet_datos_diarios_pamplona.csv")
+datos2$fecha <- as.Date(datos2$fecha, format="%Y-%m-%d")
+datos2$año <- year(datos2$fecha)
+datos2$mes <- month(datos2$fecha)
+estaciones <- c()
+
+for (mes in datos2$mes) {
+  if (mes >= 3 && mes <= 5) {
+    estaciones <- c(estaciones, 'primavera')
+  } else if (mes >= 6 && mes <= 8) {
+    estaciones <- c(estaciones, 'verano')
+  } else if (mes >= 9 && mes <= 11) {
+    estaciones <- c(estaciones, 'otoño')
+  } else {
+    estaciones <- c(estaciones, 'invierno')
+  }
+}
+datos2$estacion <- estaciones
+datos2$tmax <- as.character(datos2$tmax)
+datos2$tmin <- as.character(datos2$tmin)
+datos2$tmed <- as.character(datos2$tmed)
+datos2$tmax <- parse_number(datos2$tmax) / 10  
+datos2$tmin <- parse_number(datos2$tmin) / 10
+datos2$tmed <- parse_number(datos2$tmed) / 10
+
+datos2 <- datos2[!is.na(datos2$tmin) & !is.na(datos2$tmed) & !is.na(datos2$tmax), ]
+datos2$fecha_num <- lubridate::decimal_date(datos2$fecha)
+```
+Realizamos todos los analisis que los apartados 1,2 y 5 para la base de datos de aemet_datos_diarios_pamplona
+
+```{r}
+#Evolucion de las temperaturas a lo largo de los años 
+# Calcular medias anuales para tmax y tmin
+medias_tmax <- aggregate(tmax ~ año, data = datos2, mean)
+medias_tmin <- aggregate(tmin ~ año, data = datos2, mean)
+
+# Unir a medias_anuales2
+medias_anuales2 <- merge(medias_anuales2, medias_tmax, by = "año")
+medias_anuales2 <- merge(medias_anuales2, medias_tmin, by = "año")
+
+# Ahora medias_anuales2 tiene las columnas: año, tmed, tmax, tmin
+# Ajustar modelos para tmax y tmin
+modelo_tmed <- lm(tmed ~ año, data = medias_anuales2)
+modelo_tmax <- lm(tmax ~ año, data = medias_anuales2)
+modelo_tmin <- lm(tmin ~ año, data = medias_anuales2)
+
+# Coeficientes
+coef_tmed <- coefficients(modelo_tmed)
+coef_tmax <- coefficients(modelo_tmax)
+coef_tmin <- coefficients(modelo_tmin)
+
+# Generar secuencia de años para las rectas
+x <- seq(2000, 2025, 1)
+recta_tmed <- coef_tmed[1] + x * coef_tmed[2]
+recta_tmax <- coef_tmax[1] + x * coef_tmax[2]
+recta_tmin <- coef_tmin[1] + x * coef_tmin[2]
+
+# Graficar - vamos a hacer un gráfico con los puntos de tmed, tmax y tmin
+plot(tmed ~ año, data = medias_anuales2, 
+     ylab = "Temperatura (°C)", 
+     xlab = "Año",
+     main = "Temperaturas medias, máximas y mínimas anuales",
+     ylim = range(medias_anuales2[, c("tmed", "tmax", "tmin")]), 
+     pch = 16, col = "black")
+points(tmax ~ año, data = medias_anuales2, pch = 16, col = "red")
+points(tmin ~ año, data = medias_anuales2, pch = 16, col = "blue")
+
+# Añadir las rectas de tendencia
+lines(x, recta_tmed, col = "black")
+lines(x, recta_tmax, col = "red")
+lines(x, recta_tmin, col = "blue")
+
+# Leyenda
+legend("topleft", 
+       legend = c("Media", "Máxima", "Mínima"), 
+       col = c("black", "red", "blue"), 
+       pch = 16, 
+       lty = 1)
+
+#¿RELACION ENTRE LAS MEDIAS DE TEMPERATURA ALTA Y BAJA?
+
+boxplot(tmax ~ tmin, data = datos2)
+t.test(datos2$tmax, datos2$tmin, paired = TRUE)
+
+```
