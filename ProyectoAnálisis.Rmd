@@ -48,7 +48,7 @@ datos$tmax <- parse_number(datos$tmax) / 10
 datos$tmin <- parse_number(datos$tmin) / 10
 datos$tmed <- parse_number(datos$tmed) / 10
 
-datos <- datos[!is.na(datos$tmin) & !is.na(datos$tmed) & !is.na(datos$tmax) & !is.na(datos$horatmax) & !is.na(datos$horatmin), ]
+datos <- datos[!is.na(datos$tmin) & !is.na(datos$tmed) & !is.na(datos$tmax) & !is.na(datos$horatmax) & !is.na(datos$horatmin) & datos$horatmax != 'varias' & datos$horatmin != 'varias', ]
 datos$fecha_num <- lubridate::decimal_date(datos$fecha)
 ```
 ###1###
@@ -72,7 +72,7 @@ plot(tmed ~ fecha_num, data = datos,
         xlab="Año",
         main="Temperaturas diarias")
 
-lines(x, recta1)
+lines(x, recta1, col = "green")
 
 ```
 
@@ -84,19 +84,19 @@ plot(tmed ~ fecha_num, data = datos,
         xlab="Año",
         main="Temperaturas diarias")
 
-lines(x, recta1)
+lines(x, recta1, col = "green")
 
 modelo2  <- lm(tmin ~ fecha_num, data = datos)
 coef2 = coefficients(modelo2)
 recta2 = coef2[1] + seq(2000,2025,1)* coef2[2]
 
-lines(x, recta2)
+lines(x, recta2, col = 'blue')
 
 modelo3  <- lm(tmin ~ fecha_num, data = datos)
 coef3 = coefficients(modelo3)
 recta3 = coef3[1] + seq(2000,2025,1)* coef3[2]
 
-lines(x, recta3)
+lines(x, recta3, col = 'red')
 ```
 
 ###2###
@@ -107,6 +107,7 @@ boxplot(tmax ~ tmin, data = datos)
 t.test(datos$tmax, datos$tmin, paired = TRUE)
 
 ```
+#Este boxplot no puede ser así, hay que mirar bien los datos
 ###3###
 #¿El calentamiento afecta a todas las estaciones por igual?
 ```{r}
@@ -332,3 +333,5 @@ nuevos_datos2 <- data.frame(
 ) 
 predicciones2 <- predict(modelo_final2, newdata = nuevos_datos2)
 ```
+#cd /workspaces/ProyectoAnalisis 
+#R --vanilla --slave -e "rmarkdown::render('ProyectoAnálisis.Rmd')"
