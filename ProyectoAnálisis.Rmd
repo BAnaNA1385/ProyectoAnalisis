@@ -48,7 +48,7 @@ datos$tmax <- parse_number(datos$tmax) / 10
 datos$tmin <- parse_number(datos$tmin) / 10
 datos$tmed <- parse_number(datos$tmed) / 10
 
-datos <- datos[!is.na(datos$tmin) & !is.na(datos$tmed) & !is.na(datos$tmax), ]
+datos <- datos[!is.na(datos$tmin) & !is.na(datos$tmed) & !is.na(datos$tmax) & !is.na(datos$horatmax) & !is.na(datos$horatmin), ]
 datos$fecha_num <- lubridate::decimal_date(datos$fecha)
 ```
 ###1###
@@ -79,6 +79,13 @@ lines(x, recta1)
 Añadamos a esta gráfica las temperaturas mínimas y la temperatura media
 
 ```{r}
+plot(tmed ~ fecha_num, data = datos,
+        ylab="Temperatura máxima (°C)",
+        xlab="Año",
+        main="Temperaturas diarias")
+
+lines(x, recta1)
+
 modelo2  <- lm(tmin ~ fecha_num, data = datos)
 coef2 = coefficients(modelo2)
 recta2 = coef2[1] + seq(2000,2025,1)* coef2[2]
@@ -97,7 +104,7 @@ lines(x, recta3)
 
 ```{r}
 boxplot(tmax ~ tmin, data = datos)
-t.test(datos$tmax, datos$tmin, paired = True)
+t.test(datos$tmax, datos$tmin, paired = TRUE)
 
 ```
 ###3###
@@ -112,7 +119,7 @@ boxplot(tmed ~ estacion, data = datos)
 
 En verano
 ```{r}
-modelo  <- lm(horatmax ~ fecha_num, data = which(datos$estacion == 'verano')
+modelo  <- lm(horatmax ~ fecha_num, data = datos[datos$estacion == 'verano', ])
 coef = coefficients(modelo)
 recta1 = coef[1] + seq(2000,2025,1)* coef[2]
 x <- seq(2000,2025,1)
@@ -126,7 +133,7 @@ lines(x, recta1)
 En otoño
 
 ```{r}
-modelo  <- lm(horatmax ~ fecha_num, data = which(datos$estacion == 'otoño')
+modelo  <- lm(horatmax ~ fecha_num, data = datos[datos$estacion == 'otoño', ])
 coef = coefficients(modelo)
 recta1 = coef[1] + seq(2000,2025,1)* coef[2]
 x <- seq(2000,2025,1)
@@ -139,7 +146,7 @@ lines(x, recta1)
 ```
 En invierno
 ```{r}
-modelo  <- lm(horatmax ~ fecha_num, data = which(datos$estacion == 'invierno')
+modelo  <- lm(horatmax ~ fecha_num, data = datos[datos$estacion == 'invierno', ])
 coef = coefficients(modelo)
 recta1 = coef[1] + seq(2000,2025,1)* coef[2]
 x <- seq(2000,2025,1)
@@ -153,7 +160,7 @@ lines(x, recta1)
 
 En primavera
 ```{r}
-modelo  <- lm(horatmax ~ fecha_num, data = which(datos$estacion == 'oprimavera')
+modelo  <- lm(horatmax ~ fecha_num, data = datos[datos$estacion == 'primavera', ])
 coef = coefficients(modelo)
 recta1 = coef[1] + seq(2000,2025,1)* coef[2]
 x <- seq(2000,2025,1)
@@ -167,8 +174,8 @@ Comparamos las coef[2] de cada una de ellas (la pendiente)
 Veamos ahora si la diferencia de medias de horas máximas entre el primer y último año son estadísticamente significativas
 
 ```{r}
-datos_ultimo = which(datos, datos$año == 2024)
-datos_primero = which(datos, datos$año == 2000)
+datos_ultimo = datos[datos$año == 2024, ]
+datos_primero = datos[datos$año == 2000, ]
 t.test(datos_primero$horatmax, datos_ultimo$horatmax)
 ```
 ###5###
@@ -233,6 +240,7 @@ datos2$fecha_num <- lubridate::decimal_date(datos2$fecha)
 Realizamos todos los analisis que los apartados 1,2 y 5 para la base de datos de aemet_datos_diarios_pamplona
 
 ```{r}
+medias_anuales2 <- aggregate(tmed ~ año, data = datos2, mean)
 #Evolucion de las temperaturas a lo largo de los años 
 # Calcular medias anuales para tmax y tmin
 medias_tmax <- aggregate(tmax ~ año, data = datos2, mean)
@@ -285,7 +293,7 @@ legend("topleft",
 
 ```{r}
 boxplot(tmax ~ tmin, data = datos2)
-t.test(datos2$tmax, datos2$tmin, paired = True)
+t.test(datos2$tmax, datos2$tmin, paired = TRUE)
 ```
 
 #Hacer comparacion de los valores de las betas de las regresiones lineales de uno y otro
