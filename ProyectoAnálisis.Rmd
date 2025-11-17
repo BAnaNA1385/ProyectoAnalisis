@@ -23,12 +23,14 @@ library(lubridate)
 Importar y preparar la base de datos para el estudio que queremos realizar
 
 ```{r}
+```{r}
 datos <- read_csv("aemet_datos_diarios.csv")
 datos$fecha <- as.Date(datos$fecha, format="%Y-%m-%d")
 datos$año <- year(datos$fecha)
 datos$mes <- month(datos$fecha)
-estaciones <- c()
 
+# Create season column
+estaciones <- c()
 for (mes in datos$mes) {
   if (mes >= 3 && mes <= 5) {
     estaciones <- c(estaciones, 'primavera')
@@ -41,15 +43,25 @@ for (mes in datos$mes) {
   }
 }
 datos$estacion <- estaciones
-datos$tmax <- as.character(datos$tmax)
-datos$tmin <- as.character(datos$tmin)
-datos$tmed <- as.character(datos$tmed)
-datos$tmax <- parse_number(datos$tmax) / 10  
-datos$tmin <- parse_number(datos$tmin) / 10
-datos$tmed <- parse_number(datos$tmed) / 10
 
-datos <- datos[!is.na(datos$tmin) & !is.na(datos$tmed) & !is.na(datos$tmax) & !is.na(datos$horatmax) & !is.na(datos$horatmin) & datos$horatmax != 'varias' & datos$horatmin != 'varias', ]
+# Convert temperature columns FIRST (before filtering)
+datos$tmax <- parse_number(as.character(datos$tmax)) / 10  
+datos$tmin <- parse_number(as.character(datos$tmin)) / 10
+datos$tmed <- parse_number(as.character(datos$tmed)) / 10
+
+# Convert hora columns (handle 'varias' → NA)
+datos$horatmax <- as.numeric(as.character(datos$horatmax))
+datos$horatmin <- as.numeric(as.character(datos$horatmin))
+
+# Add fecha_num BEFORE filtering
 datos$fecha_num <- lubridate::decimal_date(datos$fecha)
+
+# NOW filter — keep rows with valid temperatures (allow NA in hora columns for now)
+datos <- datos[!is.na(datos$tmin) & !is.na(datos$tmed) & !is.na(datos$tmax), ]
+
+# Mark valid rows for hora columns (optional — use in seasonal analyses)
+datos$horatmax_valid <- !is.na(datos$horatmax)
+datos$horatmin_valid <- !is.na(datos$horatmin)
 ```
 ###1###
 #Evolución de las temperaturas a lo largo de los años 
@@ -103,9 +115,14 @@ lines(x, recta3, col = 'red')
 #Relacion entre las medias de temperatura alta y baja
 
 ```{r}
-boxplot(tmax ~ tmin, data = datos)
-t.test(datos$tmax, datos$tmin, paired = TRUE)
+# Comparar visualmente tmax y tmin
+boxplot(datos$tmax, datos$tmin, 
+        names = c("Temp. Máxima", "Temp. Mínima"),
+        ylab = "Temperatura (°C)",
+        main = "Comparación de temperaturas máximas y mínimas")
 
+# Test t-pareado para verificar si hay diferencias significativas
+t.test(datos$tmax, datos$tmin, paired = TRUE)
 ```
 #Este boxplot no puede ser así, hay que mirar bien los datos
 ###3###
@@ -120,7 +137,8 @@ boxplot(tmed ~ estacion, data = datos)
 
 En verano
 ```{r}
-modelo  <- lm(horatmax ~ fecha_num, data = datos[datos$estacion == 'verano', ])
+datos_verano <- datos[datos$estacion == 'verano' & datos$horatmax_valid, ]
+modelo  <- lm(horatmax ~ fecha_num, data = datos_verano)
 coef = coefficients(modelo)
 recta1 = coef[1] + seq(2000,2025,1)* coef[2]
 x <- seq(2000,2025,1)
