@@ -306,7 +306,7 @@ nuevos_datos <- data.frame(
   presmax = c(1025,1025,1025,1025,1025,1025,1025,1025,1025,1025),
   hrMedia = c(60,60,60,60,60,60,60,60,60,60)
 ) 
-#Quizas con un solo dato no sea suficiente
+#Quizas con un solo dato sea suficiente, está ahora mismo hacienfo 10 predicciones con distintos datos, o podemos buscar datos más extremos
 predicciones <- predict(modelo_final, newdata = nuevos_datos)
 
 #ahora repetimos el proceso para pamplona
