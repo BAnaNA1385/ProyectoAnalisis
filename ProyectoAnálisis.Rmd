@@ -280,9 +280,47 @@ legend("topleft",
        col = c("black", "red", "blue"), 
        pch = 16, 
        lty = 1)
-
+```
 #¿RELACION ENTRE LAS MEDIAS DE TEMPERATURA ALTA Y BAJA?
 
+```{r}
 boxplot(tmax ~ tmin, data = datos2)
-t.test(datos2$tmax, datos2$tmin, paired = TRUE)
+t.test(datos2$tmax, datos2$tmin, paired = True)
+```
 
+#Hacer comparacion de los valores de las betas de las regresiones lineales de uno y otro
+
+####7#####
+#HACER PREDICCIONES DE LAS TEMPERATURAS PARA LOS PRÓXIMOS 10 AÑOS
+```{r}
+modelo_final <- lm(tmax ~ tmin + mes + horatmax + horatmin + prec + velmedia + presmin + presmax + hrMedia, data = datos)
+#CAmbiar parámetros por los que salgan en el AICStep
+nuevos_datos <- data.frame(
+  tmin = c(15, 16, 17, 18, 19, 20, 21, 22, 23, 24),
+  mes = c(1,2,3,4,5,6,7,8,9,10),
+  horatmax = c(14,14,15,15,16,16,17,17,18,18),
+  horatmin = c(6,6,7,7,8,8,9,9,10,10),
+  prec = c(0,0,0,0,0,0,0,0,0,0),
+  velmedia = c(10,10,10,10,10,10,10,10,10,10),
+  presmin = c(1010,1010,1010,1010,1010,1010,1010,1010,1010,1010),
+  presmax = c(1025,1025,1025,1025,1025,1025,1025,1025,1025,1025),
+  hrMedia = c(60,60,60,60,60,60,60,60,60,60)
+) 
+#Quizas con un solo dato no sea suficiente
+predicciones <- predict(modelo_final, newdata = nuevos_datos)
+
+#ahora repetimos el proceso para pamplona
+modelo_final2 <- lm(tmax ~ tmin + mes + horatmax + horatmin + prec + velmedia + presmin + presmax + hrMedia, data = datos2)
+nuevos_datos2 <- data.frame(
+  tmin = c(15, 16, 17, 18, 19, 20, 21, 22, 23, 24),
+  mes = c(1,2,3,4,5,6,7,8,9,10),
+  horatmax = c(14,14,15,15,16,16,17,17,18,18),
+  horatmin = c(6,6,7,7,8,8,9,9,10,10),
+  prec = c(0,0,0,0,0,0,0,0,0,0),
+  velmedia = c(10,10,10,10,10,10,10,10,10,10),
+  presmin = c(1010,1010,1010,1010,1010,1010,1010,1010,1010,1010),
+  presmax = c(1025,1025,1025,1025,1025,1025,1025,1025,1025,1025),
+  hrMedia = c(60,60,60,60,60,60,60,60,60,60)
+) 
+predicciones2 <- predict(modelo_final2, newdata = nuevos_datos2)
+```
