@@ -317,6 +317,38 @@ t.test(datos2$tmax, datos2$tmin, paired = TRUE)
 
 #Hacer comparacion de los valores de las betas de las regresiones lineales de uno y otro
 
+
+# Crear un subset con solo las variables de interés (no funciona bien sino)
+vars_interes <- c("tmax", "tmin", "tmed", "año", "mes", 
+                  "prec_num", "velmedia_num", "presMin", "presMax", "hrMedia")
+
+# Eliminar filas con NA en cualquier de estas variables
+datos2_clean <- na.omit(datos2[, vars_interes])
+
+# Ahora generar el gráfico de pares
+pairs(~ tmax + tmin + tmed + año + mes + 
+        prec_num + velmedia_num + presMin + presMax + hrMedia, 
+      data = datos2_clean, pch = 16, cex = 0.5)
+
+modelo_mult2 <- lm(tmax ~ tmin + tmed + año + mes + prec_num + velmedia_num + presMin + presMax + hrMedia, data = datos2)
+
+summary(modelo_mult2)
+vif(modelo_mult2)
+pairs(~tmax+tmin+tmed+año+mes+prec+velmedia+presmin+presmax+hrMedia, data=datos2, pch = 16, cex = 0.5)
+modelo_mult2 <- lm(tmax ~ tmin + tmed + año + mes + horatmax + horatmin + prec + velmedia + presMin + presMax + hrMedia, data = datos2)
+summary(modelo_mult2)
+vif(modelo_mult2)
+```
+#Le he quitado, hrtmax, y hrtmin, porque no estaban bien hechas las conversiones 
+```{r}
+fit1  <- lm(tmax ~ ., data = datos2_clean)
+fit2 <- lm(tmax ~ 1, data = datos2_clean)
+modelAIC <- step(fit2, scope = list(lower=fit2, upper=fit1), direction="forward")
+formula <- formula(modelAIC)
+modelFinal <- lm(formula, data = datos2_clean)
+summary(modelFinal)
+vif(modelFinal)
+
 ####7#####
 #HACER PREDICCIONES DE LAS TEMPERATURAS PARA LOS PRÓXIMOS 10 AÑOS
 ```{r}
