@@ -69,12 +69,6 @@ datos$horatmin_valid <- !is.na(datos$horatmin)
 Regresión lineal de las temperaturas desde 2000
 
 ```{r}
-
-
-
-
-
-
 modelo <- lm(tmed ~ fecha_num, data = datos)
 coef = coefficients(modelo)
 recta1 = coef[1] + seq(2000,2025,1)* coef[2]
