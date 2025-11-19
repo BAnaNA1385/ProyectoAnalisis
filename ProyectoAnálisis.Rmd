@@ -85,30 +85,35 @@ plot(tmed ~ fecha_num, data = datos,
         main="Temperaturas diarias")
 
 lines(x, recta1, col = "green")
-
 ```
 
-Añadamos a esta gráfica las temperaturas mínimas y la temperatura media
+```
+x <- seq(2000, 2025, 1)
+recta_tmed <- coef_tmed[1] + x * coef_tmed[2]
+recta_tmax <- coef_tmax[1] + x * coef_tmax[2]
+recta_tmin <- coef_tmin[1] + x * coef_tmin[2]
 
-```{r}
-plot(tmed ~ fecha_num, data = datos,
-        ylab="Temperatura máxima (°C)",
-        xlab="Año",
-        main="Temperaturas diarias")
+# Graficar - vamos a hacer un gráfico con los puntos de tmed, tmax y tmin
+plot(tmed ~ año, data = medias_anuales, 
+     ylab = "Temperatura (°C)", 
+     xlab = "Año",
+     main = "Temperaturas medias, máximas y mínimas anuales",
+     ylim = range(medias_anuales2[, c("tmed", "tmax", "tmin")]), 
+     pch = 16, col = "black")
+points(tmax ~ año, data = medias_anuales, pch = 16, col = "red")
+points(tmin ~ año, data = medias_anuales, pch = 16, col = "blue")
 
-lines(x, recta1, col = "green")
+# Añadir las rectas de tendencia
+lines(x, recta_tmed, col = "black")
+lines(x, recta_tmax, col = "red")
+lines(x, recta_tmin, col = "blue")
 
-modelo2  <- lm(tmin ~ fecha_num, data = datos)
-coef2 = coefficients(modelo2)
-recta2 = coef2[1] + seq(2000,2025,1)* coef2[2]
-
-lines(x, recta2, col = 'blue')
-
-modelo3  <- lm(tmin ~ fecha_num, data = datos)
-coef3 = coefficients(modelo3)
-recta3 = coef3[1] + seq(2000,2025,1)* coef3[2]
-
-lines(x, recta3, col = 'red')
+# Leyenda
+legend("topleft", 
+       legend = c("Media", "Máxima", "Mínima"), 
+       col = c("black", "red", "blue"), 
+       pch = 16, 
+       lty = 1)
 ```
 
 ###2###
@@ -259,6 +264,18 @@ datos2$fecha_num <- lubridate::decimal_date(datos2$fecha)
 Realizamos todos los analisis que los apartados 1,2 y 5 para la base de datos de aemet_datos_diarios_pamplona
 
 ```{r}
+
+modelo2 <- lm(tmed ~ fecha_num, data = datos2)
+coef = coefficients(modelo2)
+recta1 = coef[1] + seq(2000,2025,1)* coef[2]
+x <- seq(2000,2025,1)
+plot(tmed ~ fecha_num, data = datos2,
+     ylab="Temperatura máxima (°C)",
+     xlab="Año",
+     main="Temperaturas diarias")
+
+lines(x, recta1, col = "green")
+
 medias_anuales2 <- aggregate(tmed ~ año, data = datos2, mean)
 #Evolucion de las temperaturas a lo largo de los años 
 # Calcular medias anuales para tmax y tmin
