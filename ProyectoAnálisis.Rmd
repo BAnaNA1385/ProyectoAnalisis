@@ -149,6 +149,21 @@ lines(x, recta1, col = "green")
 
 ```
 ```{r}
+medias_anuales <- aggregate(tmed ~ año, data = datos, mean)
+
+medias_tmax <- aggregate(tmax ~ año, data = datos, mean)
+medias_tmin <- aggregate(tmin ~ año, data = datos, mean)
+
+medias_anuales <- merge(medias_anuales, medias_tmax, by = "año")
+medias_anuales <- merge(medias_anuales, medias_tmin, by = "año")
+modelo_tmed <- lm(tmed ~ año, data = medias_anuales)
+modelo_tmax <- lm(tmax ~ año, data = medias_anuales)
+modelo_tmin <- lm(tmin ~ año, data = medias_anuales)
+
+# Coeficientes
+coef_tmed <- coefficients(modelo_tmed)
+coef_tmax <- coefficients(modelo_tmax)
+coef_tmin <- coefficients(modelo_tmin)
 x <- seq(2000, 2025, 1)
 recta_tmed <- coef_tmed[1] + x * coef_tmed[2]
 recta_tmax <- coef_tmax[1] + x * coef_tmax[2]
@@ -160,7 +175,7 @@ plot(tmed ~ año, data = medias_anuales,
      ylab = "Temperatura (°C)", 
      xlab = "Año",
      main = "Temperaturas medias, máximas y mínimas anuales",
-     ylim = range(medias_anuales2[, c("tmed", "tmax", "tmin")]), 
+     ylim = range(medias_anuales[, c("tmed", "tmax", "tmin")]), 
      pch = 16, col = "black")
 points(tmax ~ año, data = medias_anuales, pch = 16, col = "red")
 points(tmin ~ año, data = medias_anuales, pch = 16, col = "blue")
