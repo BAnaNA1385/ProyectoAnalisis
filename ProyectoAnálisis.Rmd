@@ -22,7 +22,7 @@ library(lubridate)
 
 Importar y preparar la base de datos para el estudio que queremos realizar
 
-```{r}
+
 ```{r}
 datos <- read_csv("aemet_datos_diarios.csv")
 datos$fecha <- as.Date(datos$fecha, format="%Y-%m-%d")
@@ -351,37 +351,106 @@ vif(modelFinal)
 
 ####7#####
 #HACER PREDICCIONES DE LAS TEMPERATURAS PARA LOS PRÓXIMOS 10 AÑOS
+Queremos ahora comparar las temperaturas que se esperan en los próximos 10 años en ambas ciudades. Para eso vamos a usar el modelo ajustado en el apartado 5 e incluimos el año como variable predictora. Además vamos a usar las medianas de las demás variables predictoras para hacer las predicciones y que estás tengan un sentido más realista que usar valores aleatorios.
 ```{r}
-modelo_final <- lm(tmax ~ tmin + mes + horatmax + horatmin + prec + velmedia + presmin + presmax + hrMedia, data = datos)
-#CAmbiar parámetros por los que salgan en el AICStep
+anios_pred <- seq(2026, 2035)
+med_tmin <- median(datos$tmin, na.rm = TRUE)
+med_mes <- median(datos$mes, na.rm = TRUE)
+med_horatmax <- median(datos$horatmax, na.rm = TRUE)
+med_horatmin <- median(datos$horatmin, na.rm = TRUE)
+med_prec <- median(datos$prec, na.rm = TRUE)
+med_velmedia <- median(datos$velmedia, na.rm = TRUE)
+med_presmin <- median(datos$presmin, na.rm = TRUE)
+med_presmax <- median(datos$presmax, na.rm = TRUE)
+med_hrMedia <- median(datos$hrMedia, na.rm = TRUE)
+
 nuevos_datos <- data.frame(
-  tmin = c(15, 16, 17, 18, 19, 20, 21, 22, 23, 24),
-  mes = c(1,2,3,4,5,6,7,8,9,10),
-  horatmax = c(14,14,15,15,16,16,17,17,18,18),
-  horatmin = c(6,6,7,7,8,8,9,9,10,10),
-  prec = c(0,0,0,0,0,0,0,0,0,0),
-  velmedia = c(10,10,10,10,10,10,10,10,10,10),
-  presmin = c(1010,1010,1010,1010,1010,1010,1010,1010,1010,1010),
-  presmax = c(1025,1025,1025,1025,1025,1025,1025,1025,1025,1025),
-  hrMedia = c(60,60,60,60,60,60,60,60,60,60)
-) 
-#Quizas con un solo dato sea suficiente, está ahora mismo hacienfo 10 predicciones con distintos datos, o podemos buscar datos más extremos
-predicciones <- predict(modelo_final, newdata = nuevos_datos)
+  año = anios_pred,
+  tmin = rep(med_tmin, length(anios_pred)),
+  mes = rep(med_mes, length(anios_pred)),
+  horatmax = rep(med_horatmax, length(anios_pred)),
+  horatmin = rep(med_horatmin, length(anios_pred)),
+  prec = rep(med_prec, length(anios_pred)),
+  velmedia = rep(med_velmedia, length(anios_pred)),
+  presmin = rep(med_presmin, length(anios_pred)),
+  presmax = rep(med_presmax, length(anios_pred)),
+  hrMedia = rep(med_hrMedia, length(anios_pred))
+)
+
+# Modelo ajustado incluyendo año
+modelo_final <- lm(tmax ~ tmin + año + mes + horatmax + horatmin + prec + velmedia + presmin + presmax + hrMedia, data = datos)
+predicciones <- predict(modelo_final, newdata = nuevos_datos, interval = "prediction")
+
 
 #ahora repetimos el proceso para pamplona
-modelo_final2 <- lm(tmax ~ tmin + mes + horatmax + horatmin + prec + velmedia + presmin + presmax + hrMedia, data = datos2)
+anios_pred <- seq(2026, 2035)
+med_tmin2 <- median(datos2$tmin, na.rm = TRUE)
+med_mes2 <- median(datos2$mes, na.rm = TRUE)
+med_horatmax2 <- median(datos2$horatmax, na.rm = TRUE)
+med_horatmin2 <- median(datos2$horatmin, na.rm = TRUE)
+med_prec2 <- median(datos2$prec, na.rm = TRUE)
+med_velmedia2 <- median(datos2$velmedia, na.rm = TRUE)
+med_presmin2 <- median(datos2$presmin, na.rm = TRUE)
+med_presmax2 <- median(datos2$presmax, na.rm = TRUE)
+med_hrMedia2 <- median(datos2$hrMedia, na.rm = TRUE)
+
 nuevos_datos2 <- data.frame(
-  tmin = c(15, 16, 17, 18, 19, 20, 21, 22, 23, 24),
-  mes = c(1,2,3,4,5,6,7,8,9,10),
-  horatmax = c(14,14,15,15,16,16,17,17,18,18),
-  horatmin = c(6,6,7,7,8,8,9,9,10,10),
-  prec = c(0,0,0,0,0,0,0,0,0,0),
-  velmedia = c(10,10,10,10,10,10,10,10,10,10),
-  presmin = c(1010,1010,1010,1010,1010,1010,1010,1010,1010,1010),
-  presmax = c(1025,1025,1025,1025,1025,1025,1025,1025,1025,1025),
-  hrMedia = c(60,60,60,60,60,60,60,60,60,60)
-) 
-predicciones2 <- predict(modelo_final2, newdata = nuevos_datos2)
+  año = anios_pred,
+  tmin = rep(med_tmin2, length(anios_pred)),
+  mes = rep(med_mes2, length(anios_pred)),
+  horatmax = rep(med_horatmax2, length(anios_pred)),
+  horatmin = rep(med_horatmin2, length(anios_pred)),
+  prec = rep(med_prec2, length(anios_pred)),
+  velmedia = rep(med_velmedia2, length(anios_pred)),
+  presmin = rep(med_presmin2, length(anios_pred)),
+  presmax = rep(med_presmax2, length(anios_pred)),
+  hrMedia = rep(med_hrMedia2, length(anios_pred))
+)
+modelo_final2<- lm(tmax ~ tmin + año + mes + horatmax + horatmin + prec + velmedia + presmin + presmax + hrMedia, data = datos)
+predicciones2 <- predict(modelo_final2, newdata = nuevos_datos2, interval = "prediction")
 ```
-#cd /workspaces/ProyectoAnalisis 
-#R --vanilla --slave -e "rmarkdown::render('ProyectoAnálisis.Rmd')"
+
+Como podemos observar en las predicciones realizadas para ambas ciudades, se espera un aumento gradual de las temperaturas máximas diarias en los próximos 10 años. Este incremento es consistente con las tendencias observadas en los datos históricos y refleja el impacto continuo del cambio climático en nuestras regiones. En San Sebastián, las temperaturas máximas proyectadas muestran un aumento más pronunciado en comparación con Pamplona, lo que podría atribuirse a factores geográficos y climáticos específicos de cada área. 
+Para hacer un énfasis del aumento de las temperaturas desde el año 2000 haremos una predicción de la temperatura de ese año usando las medianas de las demás variables predictoras y compararemos el resultado con las predicciones para los próximos 10 años. En San Sebastián:
+
+```{r}
+nuevo_inicial <- data.frame(
+  año = min(datos$año, na.rm = TRUE),
+  tmin = med_tmin,
+  mes = med_mes,
+  horatmax = med_horatmax,
+  horatmin = med_horatmin,
+  prec = med_prec,
+  velmedia = med_velmedia,
+  presmin = med_presmin,
+  presmax = med_presmax,
+  hrMedia = med_hrMedia
+)
+pred_inicio <- predict(modelo_final, newdata = nuevo_inicial, interval = "prediction")
+```
+(rellenar los datos con los que pone abajo)
+El modelo predice que la temperatura máxima podría aumentar %.2f grados para 2035 respecto al año inicial, con un intervalo de confianza entre %.2f y %.2f grados.\n
+pred2035[1] - pred_inicio[1], pred2035[2] - pred_inicio[2], pred2035[3] - pred_inicio[3]
+
+Repitamos el proceso para Pamplona: 
+```{r} 
+nuevo_inicial2 <- data.frame(
+  año = min(datos2$año, na.rm = TRUE),
+  tmin = med_tmin2,
+  mes = med_mes2,
+  horatmax = med_horatmax2,
+  horatmin = med_horatmin2,
+  prec = med_prec2,
+  velmedia = med_velmedia2,
+  presmin = med_presmin2,
+  presmax = med_presmax2,
+  hrMedia = med_hrMedia2
+)
+pred_inicio2 <- predict(modelo_final2, newdata = nuevo_inicial2, interval = "prediction")
+```
+El modelo predice que la temperatura máxima podría aumentar %.2f grados para 2035 respecto al año inicial, con un intervalo de confianza entre %.2f y %.2f grados.\n
+pred2035_2[1] - pred_inicio2[1], pred2035_2[2] - pred_inicio2[2], pred2035_2[3] - pred_inicio2[3]
+
+
+cd /workspaces/ProyectoAnalisis 
+R --vanilla --slave -e "rmarkdown::render('ProyectoAnálisis.Rmd')"
