@@ -17,7 +17,7 @@ library(osmdata)
 library(dplyr)
 library(readr)
 library(lubridate)
-
+library(car)
 ```
 
 Importar y preparar la base de datos para el estudio que queremos realizar
@@ -47,22 +47,38 @@ datos$horatmin[datos$horatmin == "varias"] <- NA
 datos$tmax <- parse_number(as.character(datos$tmax)) / 10  
 datos$tmin <- parse_number(as.character(datos$tmin)) / 10
 datos$tmed <- parse_number(as.character(datos$tmed)) / 10
-
+datos$presMax <- parse_number(as.character(datos$presMax))
+datos$presMin <- parse_number(as.character(datos$presMin))
+datos$prec <- parse_number(as.character(datos$prec))
+datos$velmedia <- parse_number(as.character(datos$velmedia))
+datos$hrMedia <- parse_number(as.character(datos$hrMedia))
 
 datos$fecha_num <- lubridate::decimal_date(datos$fecha)
+datos$horatmax <- ifelse(datos$horatmax %in% c("", "varias", NA), NA, datos$horatmax)
+datos$horatmin <- ifelse(datos$horatmin %in% c("", "varias", NA), NA, datos$horatmin)
 
-datos <- datos[!is.na(datos$tmin) & !is.na(datos$tmed) & !is.na(datos$tmax), ]
+datos$horatmax_decimal <- NA_real_
+valid_max <- !is.na(datos$horatmax)
+datos$horatmax_decimal[valid_max] <- {
+  horas <- as.numeric(sub(":.*", "", datos$horatmax[valid_max]))
+  minutos <- as.numeric(sub(".*:", "", datos$horatmax[valid_max]))
+  horas + minutos/60
+}
 
-datos$horatmax <- as.character(datos$horatmax)
-datos$horatmax[datos$horatmax == "varias"] <- NA         # If "varias" means "several" times or missing
-datos$horatmax[datos$horatmax == ""] <- NA               # Empty strings as NA
-datos$horatmax <- as.numeric(datos$horatmax)
-datos$horatmax_valid <- !is.na(datos$horatmax)
-datos$horatmin <- as.character(datos$horatmin)
-datos$horatmin[datos$horatmin == "varias"] <- NA
-datos$horatmin[datos$horatmin == ""] <- NA
-datos$horatmin <- as.numeric(datos$horatmin)
-datos$horatmin_valid <- !is.na(datos$horatmin)
+datos$horatmin_decimal <- NA_real_
+valid_min <- !is.na(datos$horatmin)
+datos$horatmin_decimal[valid_min] <- {
+  horas <- as.numeric(sub(":.*", "", datos$horatmin[valid_min]))
+  minutos <- as.numeric(sub(".*:", "", datos$horatmin[valid_min]))
+  horas + minutos/60
+}
+
+datos <- datos[!is.na(datos$tmin) & 
+               !is.na(datos$tmed) & 
+               !is.na(datos$tmax) & 
+               !is.na(datos$horatmax_decimal) & 
+               !is.na(datos$horatmin_decimal) &
+               !is.na(datos$fecha_num), ]
 ```
 ###1###
 #Evolución de las temperaturas a lo largo de los años 
@@ -133,12 +149,12 @@ boxplot(tmed ~ estacion, data = datos)
 
 En verano
 ```{r}
-datos_verano <- datos[datos$estacion == 'verano' & datos$horatmax_valid, ]
-modelo  <- lm(horatmax ~ fecha_num, data = datos_verano)
+datos_verano <- datos[datos$estacion == 'verano' & datos$horatmax_decimal, ]
+modelo  <- lm(horatmax_decimal ~ fecha_num, data = datos_verano)
 coef = coefficients(modelo)
 recta1 = coef[1] + seq(2000,2025,1)* coef[2]
 x <- seq(2000,2025,1)
-plot(horatmax ~ fecha_num, data = datos,
+plot(horatmax_decimal ~ fecha_num, data = datos,
         ylab="Temperatura máxima (°C)",
         xlab="Año",
         main="Temperaturas diarias")
@@ -148,11 +164,11 @@ lines(x, recta1)
 En otoño
 
 ```{r}
-modelo  <- lm(horatmax ~ fecha_num, data = datos[datos$estacion == 'otoño', ])
+modelo  <- lm(horatmax_decimal ~ fecha_num, data = datos[datos$estacion == 'otoño', ])
 coef = coefficients(modelo)
 recta1 = coef[1] + seq(2000,2025,1)* coef[2]
 x <- seq(2000,2025,1)
-plot(horatmax ~ fecha_num, data = datos,
+plot(horatmax_decimal ~ fecha_num, data = datos,
         ylab="Temperatura máxima (°C)",
         xlab="Año",
         main="Temperaturas diarias")
@@ -161,11 +177,11 @@ lines(x, recta1)
 ```
 En invierno
 ```{r}
-modelo  <- lm(horatmax ~ fecha_num, data = datos[datos$estacion == 'invierno', ])
+modelo  <- lm(horatmax_decimal ~ fecha_num, data = datos[datos$estacion == 'invierno', ])
 coef = coefficients(modelo)
 recta1 = coef[1] + seq(2000,2025,1)* coef[2]
 x <- seq(2000,2025,1)
-plot(horatmax ~ fecha_num, data = datos,
+plot(horatmax_decimal ~ fecha_num, data = datos,
         ylab="Temperatura máxima (°C)",
         xlab="Año",
         main="Temperaturas diarias")
@@ -175,11 +191,11 @@ lines(x, recta1)
 
 En primavera
 ```{r}
-modelo  <- lm(horatmax ~ fecha_num, data = datos[datos$estacion == 'primavera', ])
+modelo  <- lm(horatmax_decimal ~ fecha_num, data = datos[datos$estacion == 'primavera', ])
 coef = coefficients(modelo)
 recta1 = coef[1] + seq(2000,2025,1)* coef[2]
 x <- seq(2000,2025,1)
-plot(horatmax ~ fecha_num, data = datos,
+plot(horatmax_decimal ~ fecha_num, data = datos,
         ylab="Temperatura máxima (°C)",
         xlab="Año",
         main="Temperaturas diarias")
@@ -191,20 +207,20 @@ Veamos ahora si la diferencia de medias de horas máximas entre el primer y últ
 ```{r}
 datos_ultimo = datos[datos$año == 2024, ]
 datos_primero = datos[datos$año == 2000, ]
-t.test(datos_primero$horatmax, datos_ultimo$horatmax)
+t.test(datos_primero$horatmax_decimal, datos_ultimo$horatmax_decimal, paired = FALSE)
 ```
 ###5###
 #Regresión lineal múltiple para predecir la temperatura máxima diaria
 ```{r}
-pairs(~tmax+tmin+tmed+año+mes+horatmax+horatmin+prec+velmedia+presmin+presmax+hrMedia, data=datos, pch = 16, cex = 0.5)
-modelo_mult <- lm(tmax ~ tmin + tmed + año + mes + horatmax + horatmin + prec + velmedia + presmin + presmax + hrMedia, data = datos)
+pairs(~tmax+tmin+tmed+año+mes+horatmax_decimal+datos$horatmin_decimal+prec+velmedia+presMin+presMax+hrMedia, data=datos, pch = 16, cex = 0.5)
+modelo_mult <- lm(tmax ~ tmin + tmed + año + mes + horatmax_decimal + datos$horatmin_decimal + prec + velmedia + presMin + presMax + hrMedia, data = datos)
 summary(modelo_mult)
 vif(modelo_mult)
 ```
 
 ```{r}
-pairs(~tmax+tmin+tmed+año+mes+horatmax+horatmin+prec+velmedia+presmin+presmax+hrMedia, data=datos, pch = 16, cex = 0.5)
-modelo_mult <- lm(tmax ~ tmin + tmed + año + mes + horatmax + horatmin + prec + velmedia + presmin + presmax + hrMedia, data = datos)
+pairs(~tmax+tmin+tmed+año+mes+horatmax_decimal+horatmin_decimal+prec+velmedia+presMin+presMax+hrMedia, data=datos, pch = 16, cex = 0.5)
+modelo_mult <- lm(tmax ~ tmin + tmed + año + mes + horatmax_decimal + horatmin_decimal + prec + velmedia + presMin + presMax + hrMedia, data = datos)
 summary(modelo_mult)
 vif(modelo_mult)
 ```
@@ -316,29 +332,29 @@ t.test(datos2$tmax, datos2$tmin, paired = TRUE)
 
 # Crear un subset con solo las variables de interés (no funciona bien sino)
 vars_interes <- c("tmax", "tmin", "tmed", "año", "mes", 
-                  "prec_num", "velmedia_num", "presMin", "presMax", "hrMedia")
+                  "prec", "velmedia", "presMin", "presMax", "hrMedia")
 
 # Eliminar filas con NA en cualquier de estas variables
 datos2_clean <- na.omit(datos2[, vars_interes])
 
 # Ahora generar el gráfico de pares
 pairs(~ tmax + tmin + tmed + año + mes + 
-        prec_num + velmedia_num + presMin + presMax + hrMedia, 
+        prec + velmedia + presMin + presMax + hrMedia, 
       data = datos2_clean, pch = 16, cex = 0.5)
 
 modelo_mult2 <- lm(tmax ~ tmin + tmed + año + mes + prec_num + velmedia_num + presMin + presMax + hrMedia, data = datos2)
 
 summary(modelo_mult2)
 vif(modelo_mult2)
-pairs(~tmax+tmin+tmed+año+mes+prec+velmedia+presmin+presmax+hrMedia, data=datos2, pch = 16, cex = 0.5)
+pairs(~tmax+tmin+tmed+año+mes+prec+velmedia+presMin+presMax+hrMedia, data=datos2, pch = 16, cex = 0.5)
 modelo_mult2 <- lm(tmax ~ tmin + tmed + año + mes + horatmax + horatmin + prec + velmedia + presMin + presMax + hrMedia, data = datos2)
 summary(modelo_mult2)
 vif(modelo_mult2)
 ```
 #Le he quitado, hrtmax, y hrtmin, porque no estaban bien hechas las conversiones 
 ```{r}
-fit1  <- lm(tmax ~ ., data = datos2_clean)
-fit2 <- lm(tmax ~ 1, data = datos2_clean)
+fit1  <- lm(tmax_decimal ~ ., data = datos2_clean)
+fit2 <- lm(tmax_decimal ~ 1, data = datos2_clean)
 modelAIC <- step(fit2, scope = list(lower=fit2, upper=fit1), direction="forward")
 formula <- formula(modelAIC)
 modelFinal <- lm(formula, data = datos2_clean)
@@ -356,8 +372,8 @@ med_horatmax <- median(datos$horatmax, na.rm = TRUE)
 med_horatmin <- median(datos$horatmin, na.rm = TRUE)
 med_prec <- median(datos$prec, na.rm = TRUE)
 med_velmedia <- median(datos$velmedia, na.rm = TRUE)
-med_presmin <- median(datos$presmin, na.rm = TRUE)
-med_presmax <- median(datos$presmax, na.rm = TRUE)
+med_presMin <- median(datos$presMin, na.rm = TRUE)
+med_presMax <- median(datos$presMax, na.rm = TRUE)
 med_hrMedia <- median(datos$hrMedia, na.rm = TRUE)
 
 nuevos_datos <- data.frame(
@@ -368,13 +384,13 @@ nuevos_datos <- data.frame(
   horatmin = rep(med_horatmin, length(anios_pred)),
   prec = rep(med_prec, length(anios_pred)),
   velmedia = rep(med_velmedia, length(anios_pred)),
-  presmin = rep(med_presmin, length(anios_pred)),
-  presmax = rep(med_presmax, length(anios_pred)),
+  presMin = rep(med_presMin, length(anios_pred)),
+  presMax = rep(med_presMax, length(anios_pred)),
   hrMedia = rep(med_hrMedia, length(anios_pred))
 )
 
 # Modelo ajustado incluyendo año
-modelo_final <- lm(tmax ~ tmin + año + mes + horatmax + horatmin + prec + velmedia + presmin + presmax + hrMedia, data = datos)
+modelo_final <- lm(tmax ~ tmin + año + mes + horatmax + horatmin + prec + velmedia + presMin + presMax + hrMedia, data = datos)
 predicciones <- predict(modelo_final, newdata = nuevos_datos, interval = "prediction")
 
 
@@ -386,8 +402,8 @@ med_horatmax2 <- median(datos2$horatmax, na.rm = TRUE)
 med_horatmin2 <- median(datos2$horatmin, na.rm = TRUE)
 med_prec2 <- median(datos2$prec, na.rm = TRUE)
 med_velmedia2 <- median(datos2$velmedia, na.rm = TRUE)
-med_presmin2 <- median(datos2$presmin, na.rm = TRUE)
-med_presmax2 <- median(datos2$presmax, na.rm = TRUE)
+med_presMin2 <- median(datos2$presMin, na.rm = TRUE)
+med_presMax2 <- median(datos2$presMax, na.rm = TRUE)
 med_hrMedia2 <- median(datos2$hrMedia, na.rm = TRUE)
 
 nuevos_datos2 <- data.frame(
@@ -398,11 +414,11 @@ nuevos_datos2 <- data.frame(
   horatmin = rep(med_horatmin2, length(anios_pred)),
   prec = rep(med_prec2, length(anios_pred)),
   velmedia = rep(med_velmedia2, length(anios_pred)),
-  presmin = rep(med_presmin2, length(anios_pred)),
-  presmax = rep(med_presmax2, length(anios_pred)),
+  presMin = rep(med_presMin2, length(anios_pred)),
+  presMax = rep(med_presMax2, length(anios_pred)),
   hrMedia = rep(med_hrMedia2, length(anios_pred))
 )
-modelo_final2<- lm(tmax ~ tmin + año + mes + horatmax + horatmin + prec + velmedia + presmin + presmax + hrMedia, data = datos2)
+modelo_final2<- lm(tmax ~ tmin + año + mes + horatmax + horatmin + prec + velmedia + presMin + presMax + hrMedia, data = datos2)
 predicciones2 <- predict(modelo_final2, newdata = nuevos_datos2, interval = "prediction")
 ```
 
@@ -418,8 +434,8 @@ nuevo_inicial <- data.frame(
   horatmin = med_horatmin,
   prec = med_prec,
   velmedia = med_velmedia,
-  presmin = med_presmin,
-  presmax = med_presmax,
+  presMin = med_presMin,
+  presMax = med_presMax,
   hrMedia = med_hrMedia
 )
 pred_inicio <- predict(modelo_final, newdata = nuevo_inicial, interval = "prediction")
@@ -438,8 +454,8 @@ nuevo_inicial2 <- data.frame(
   horatmin = med_horatmin2,
   prec = med_prec2,
   velmedia = med_velmedia2,
-  presmin = med_presmin2,
-  presmax = med_presmax2,
+  presMin = med_presMin2,
+  presMax = med_presMax2,
   hrMedia = med_hrMedia2
 )
 pred_inicio2 <- predict(modelo_final2, newdata = nuevo_inicial2, interval = "prediction")
