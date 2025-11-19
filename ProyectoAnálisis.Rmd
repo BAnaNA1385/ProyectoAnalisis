@@ -150,12 +150,14 @@ plot(tmed ~ fecha_num, data = datos,
 lines(x, recta1, col = "green")
 
 ```
+```{r}
 x <- seq(2000, 2025, 1)
 recta_tmed <- coef_tmed[1] + x * coef_tmed[2]
 recta_tmax <- coef_tmax[1] + x * coef_tmax[2]
 recta_tmin <- coef_tmin[1] + x * coef_tmin[2]
 
 # Graficar - vamos a hacer un gráfico con los puntos de tmed, tmax y tmin
+
 plot(tmed ~ año, data = medias_anuales, 
      ylab = "Temperatura (°C)", 
      xlab = "Año",
