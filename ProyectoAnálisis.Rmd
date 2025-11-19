@@ -137,7 +137,6 @@ datos2 <- datos2[
 Regresión lineal de las temperaturas desde 2000
 
 ```{r}
-
 modelo <- lm(tmed ~ fecha_num, data = datos)
 coef = coefficients(modelo)
 recta1 = coef[1] + seq(2000,2025,1)* coef[2]
@@ -146,7 +145,6 @@ plot(tmed ~ fecha_num, data = datos,
         ylab="Temperatura máxima (°C)",
         xlab="Año",
         main="Temperaturas diarias")
-
 lines(x, recta1, col = "green")
 
 ```
