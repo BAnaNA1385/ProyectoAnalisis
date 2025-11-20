@@ -223,6 +223,12 @@ El p-value del t-test nos indica si rechazamos o no la hipótesis nula. El p-val
 Primero representemos las temperaturas medias diarias por estaciones del año mediante un boxplot con los datos desde el año 2000.
 ```{r}
 boxplot(tmed ~ estacion, data = datos)
+# Test ANOVA para comparar medias entre estaciones
+modelo_anova <- aov(tmed ~ estacion, data = datos)
+summary(modelo_anova)
+
+#el p-value es extremadamente pequeño, por lo que la estación tiene un impacto estadisticamente significativo
+#El calentamiento no afecta igual a todas las estaciones 
 ```
 
 ## Variabilidad por estaciones de hora de temperatura máxima y mínima
