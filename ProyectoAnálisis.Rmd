@@ -132,6 +132,10 @@ datos2 <- datos2[
   !is.na(datos2$fecha_num), ]
 
 ```
+##Introduccion 
+
+La percepción generalizada de que los veranos son cada vez más cálidos y los patrones climáticos más extremos plantea cuestiones fundamentales. ¿Se trata de meras impresiones subjetivas o existe realmente una tendencia climática cuantificable? Este análisis aborda científicamente esta cuestión mediante el examen de datos meteorológicos históricos de AEMET. Buscamos determinar si las variaciones térmicas responden a patrones consistentes, evaluar el impacto diferenciado por estaciones y localizaciones geográficas, y desarrollar modelos predictivos que permitan anticipar escenarios futuros en el contexto del cambio climático actual.
+
 # Evolución de las temperaturas a lo largo de los años
 
 ## Regresión lineal de las temperaturas medias desde 2000
@@ -545,5 +549,8 @@ pred_inicio2
 ```
 El modelo predice que la temperatura máxima podría aumentar 3.91 °C para 2035 respecto al año inicial, con un intervalo de confianza entre 3.91 °C y 3.92 °C.
 
+##Conclusiones
+A modo de conclusion, el análisis confirma un calentamiento progresivo en ambas ciudades, más pronunciado en Pamplona (interior) que en San Sebastián (costa). Las temperaturas máximas aumentan más que las mínimas, y el calentamiento varía estacionalmente, siendo primavera y verano las más afectadas. Se observan cambios en los patrones horarios: la temperatura máxima ocurre más tarde en primavera/verano y más temprano en otoño/invierno. Las proyecciones indican una continuación de esta tendencia, con aumentos mayores en Pamplona. Estos resultados subrayan la necesidad de políticas de adaptación al cambio climático basadas en evidencias locales.
+cd /workspaces/ProyectoAnalisis 
 cd /workspaces/ProyectoAnalisis 
 R --vanilla --slave -e "rmarkdown::render('ProyectoAnálisis.Rmd')"
