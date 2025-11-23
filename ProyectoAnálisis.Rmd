@@ -3,7 +3,9 @@ title: "Proyecto Análisis"
 output:
   html_document:
     toc: true
-    toc_depth: 2
+    toc_float: true     # Makes TOC a floating sidebar
+    toc_collapsed: false  # Keep TOC expanded
+    toc_depth: 3        # Adjust to show subheadings
 author: "Maddi Casaiz y Ana Díaz"
 date: "`r Sys.Date()`"
 --- 
@@ -227,14 +229,14 @@ Para responder a esta pregunta, primero vamos a representar las temperaturas med
 ```{r}
 boxplot(tmed ~ estacion, data = datos)
 ```
-Ahora el Test ANOVA para comparar medias entre estaciones, nuestra hipó
+Para saber si el calentamiento afecta igual a todas las estaciones, no basta con comparar sólo las medias de temperatura, ya que por definición las estaciones registran valores diferentes. Lo apropiado es analizar si la tendencia de subida de temperatura es la misma en todas ellas.
+Esto se puede hacer ajustando un modelo lineal de temperatura en función de la estación, el año y su interacción. Si la interacción es significativa, el calentamiento es distinto entre estaciones.
 ```{r}
-modelo_anova <- aov(tmed ~ estacion, data = datos)
-summary(modelo_anova)
+modelo <- lm(tmed ~ estacion * año, data = datos)
+summary(modelo)
 ```
-El p-value es extremadamente pequeño, por lo que la estación tiene un impacto estadisticamente significativo
-El calentamiento no afecta igual a todas las estaciones
-
+Así, podemos concluir si el ritmo de calentamiento ha sido igual o distinto en cada estación.
+En este caso, el p-valor asociado al término de interacción (estacion: año) es menor que 0.05, lo que indica que hay diferencias significativas en la tendencia de calentamiento entre las estaciones del año. Por lo tanto, podemos concluir que el calentamiento no afecta a todas las estaciones por igual.
 ## Variabilidad por estaciones de hora de temperatura máxima
 Ahora vamos a ver si la hora a la que se alcanza la temperatura máxima ha cambiado a lo largo de los años en las distintas estaciones del año. Para ello ajustamos una regresión lineal para cada estación del año y representamos las rectas de regresión sobre el gráfico de dispersión de las horas de temperatura máxima frente al año.
 
