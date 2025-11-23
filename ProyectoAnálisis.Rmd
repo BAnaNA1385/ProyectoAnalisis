@@ -19,7 +19,7 @@ library(readr)
 library(lubridate)
 library(car)
 ```
-
+cambio 
 # Análisis de datos meteorológicos de AEMET
 
 ```{r include=FALSE}
