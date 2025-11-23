@@ -3,7 +3,9 @@ title: "Proyecto Análisis"
 output:
   html_document:
     toc: true
-    toc_depth: 2
+    toc_float: true     # Makes TOC a floating sidebar
+    toc_collapsed: false  # Keep TOC expanded
+    toc_depth: 3        # Adjust to show subheadings
 author: "Maddi Casaiz y Ana Díaz"
 date: "`r Sys.Date()`"
 --- 
@@ -149,7 +151,9 @@ plot(tmed ~ fecha_num, data = datos,
 lines(x, recta1, col = "green")
 coef
 ```
-Como podemos observar, la pendiente de la recta de regresión es positiva, lo que indica un aumento en la temperatura media diaria a lo largo de los años, sugiriendo una tendencia de calentamiento.
+Como podemos observar, la pendiente de la recta de regresión es positiva (0.05377831), lo que indica un aumento en la temperatura media diaria a lo largo de los años, sugiriendo una tendencia de calentamiento. 
+Sin embargo es un muy pequeño, el aumento anual es de aproximadamente 0.054 °C por año, lo que sería un aumento de aproximadamente 1.35 °C en 25 años (de 2000 a 2025).
+
 ## Representación de las temperaturas máximas y mínimas anuales
 Veamos ahora si esto ocurre también en las temperaturas máximas y mínimas. Para que los datos se vean más claramente en vez de representar los datos diarios de los tres datos, vamos a calcular las medias anuales de tmed, tmax y tmin y representarlas en un mismo gráfico con sus respectivas rectas de regresión.
 ```{r}
@@ -201,7 +205,8 @@ legend("topleft",
        lty = 1)
 ```
 
-De este gráfico y de los valores de los coeficientes de las pendientes, podemos observar que tanto las temperaturas máximas como las mínimas han aumentado a lo largo de los años, con la temperatura máxima mostrando un aumento más pronunciado en comparación con la mínima. Esto sugiere que el calentamiento global está afectando de manera más significativa a las temperaturas máximas diarias. 
+De este gráfico y de los valores de los coeficientes de las pendientes, podemos observar que tanto las temperaturas máximas como las mínimas han aumentado a lo largo de los años, con la temperatura máxima mostrando un aumento más pronunciado en comparación con la mínima. Esto sugiere que el calentamiento global está afectando de manera más significativa a las temperaturas máximas diarias.
+
 
 
 # Relacion entre las medias de temperatura alta y baja
@@ -220,7 +225,7 @@ t.test(datos$tmax, datos$tmin, paired = TRUE)
 El p-value del t-test nos indica si rechazamos o no la hipótesis nula. El p-valor es mucho menor que 0.05 (2.2e-16) por lo que rechazamos H0 y concluimos que hay una diferencia significativa entre las temperaturas máximas y mínimas diarias. Es decir, las temperaturas máximas y mínimas no aumentan de manera uniforme, lo que podría tener implicaciones importantes para la comprensión del impacto del cambio climático en los patrones de temperatura diaria.
 
 # ¿El calentamiento afecta a todas las estaciones por igual?
-Primero representemos las temperaturas medias diarias por estaciones del año mediante un boxplot con los datos desde el año 2000.
+Para responder a esta pregunta, primero vamos a representar las temperaturas medias diarias por estaciones del año mediante un boxplot. Luego, realizaremos un análisis de varianza (ANOVA) para comparar las medias de las temperaturas entre las diferentes estaciones del año y ver si hay diferencias significativas.
 ```{r}
 boxplot(tmed ~ estacion, data = datos)
 # Test ANOVA para comparar medias entre estaciones
@@ -230,9 +235,15 @@ summary(modelo_anova)
 #el p-value es extremadamente pequeño, por lo que la estación tiene un impacto estadisticamente significativo
 #El calentamiento no afecta igual a todas las estaciones 
 ```
-
-## Variabilidad por estaciones de hora de temperatura máxima y mínima
-
+Para saber si el calentamiento afecta igual a todas las estaciones, no basta con comparar sólo las medias de temperatura, ya que por definición las estaciones registran valores diferentes. Lo apropiado es analizar si la tendencia de subida de temperatura es la misma en todas ellas.
+Esto se puede hacer ajustando un modelo lineal de temperatura en función de la estación, el año y su interacción. Si la interacción es significativa, el calentamiento es distinto entre estaciones.
+```{r}
+modelo <- lm(tmed ~ estacion * año, data = datos)
+summary(modelo)
+```
+Así, podemos concluir si el ritmo de calentamiento ha sido igual o distinto en cada estación.
+En este caso, el p-valor asociado al término de interacción (estacion: año) es menor que 0.05, lo que indica que hay diferencias significativas en la tendencia de calentamiento entre las estaciones del año. Por lo tanto, podemos concluir que el calentamiento no afecta a todas las estaciones por igual.
+## Variabilidad por estaciones de hora de temperatura máxima
 Ahora vamos a ver si la hora a la que se alcanza la temperatura máxima ha cambiado a lo largo de los años en las distintas estaciones del año. Para ello ajustamos una regresión lineal para cada estación del año y representamos las rectas de regresión sobre el gráfico de dispersión de las horas de temperatura máxima frente al año.
 
 ### En verano
@@ -249,7 +260,7 @@ plot(horatmax_decimal ~ fecha_num, data = datos,
 lines(x, recta1, col = "red" )
 coef
 ```
-
+El coeficiente de la pendiente es de  0.0011 lo que indica que la hora de la temperatura máxima ha aumentado ligeramente a lo largo de los años en verano, aunque el cambio es muy pequeño (aproximadamente 0.0011 horas por año, o alrededor de 0.066 minutos por año).
 ### En otoño
 
 ```{r}
@@ -264,7 +275,7 @@ plot(horatmax_decimal ~ fecha_num, data = datos,
 lines(x, recta1, col = "red" )
 coef
 ```
-
+En otoño, sin embargo, el coeficiente es negativo (-0.0011), la temperatura máxima ha tendido a ocurrir un poco más temprano en el día a lo largo de los años, aunque nuevamente el cambio es muy pequeño.
 ### En invierno
 ```{r}
 modelo  <- lm(horatmax_decimal ~ fecha_num, data = datos[datos$estacion == 'invierno', ])
@@ -278,7 +289,7 @@ plot(horatmax_decimal ~ fecha_num, data = datos,
 lines(x, recta1, col = "red" )
 coef
 ```
-
+Al igual que en otono, la pendiente es negativa, sin embargo su valore es algo mayor (-0.0015). Lo que indica que en invierno ha cambiado algo más la hora de temperatura máxima.
 ### En primavera
 ```{r}
 modelo  <- lm(horatmax_decimal ~ fecha_num, data = datos[datos$estacion == 'primavera', ])
@@ -292,37 +303,34 @@ plot(horatmax_decimal ~ fecha_num, data = datos,
 lines(x, recta1, col = "red" )
 coef
 ```
+Por último, en primavera observamos que la pendiente vuelve a ser positiva (0.015) la mayor de todas con diferencia. Lo que indica que en esta estación encontramos el mayor cambio en la hora de la temperatura máxima a lo largo de los años.
+Comparando las pendientes de las cuatro estaciones, podemos concluir que la hora de la temperatura máxima ha cambiado de manera diferente según la estación del año. En verano y primavera, la hora de la temperatura máxima ha tendido a ocurrir más tarde en el día, mientras que en otoño e invierno ha tendido a ocurrir más temprano. Sin embargo, es importante destacar que los cambios son bastante pequeños en todas las estaciones.
 
-(Comparamos las coef[2] de cada una de ellas (la pendiente))
 ### ¿Ha cambiado la hora de la temperatura máxima a lo largo de los años?
 Veamos ahora si la diferencia de medias de horas máximas entre el primer y último año son estadísticamente significativas
+
 ```{r}
 datos_ultimo = datos[datos$año == 2024, ]
 datos_primero = datos[datos$año == 2000, ]
 t.test(datos_primero$horatmax_decimal, datos_ultimo$horatmax_decimal, paired = FALSE)
 ```
-El p-valor obtenido es 0.05352, que es ligeramente mayor que el umbral común de 0.05. Por lo tanto, no rechazamos la hipótesis nula y concluimos que no hay evidencia suficiente para afirmar que la hora de la temperatura máxima ha cambiado significativamente entre el año 2000 y 2024.
+El p-valor obtenido es 0,1497 , que es mayor que el umbral común de 0.05. Por lo tanto, no rechazamos la hipótesis nula y concluimos que no hay evidencia suficiente para afirmar que la hora de la temperatura máxima ha cambiado significativamente entre el año 2000 y 2024.
 
 # Regresión lineal múltiple para predecir la temperatura máxima diaria
+Vamos a construir un modelo de regresión lineal múltiple para predecir la temperatura máxima diaria (tmax) utilizando varias variables predictoras disponibles en el conjunto de datos. Primero, examinamos las relaciones entre las variables mediante un gráfico de pares y luego ajustamos un modelo de regresión lineal múltiple.
+
 ```{r}
-pairs(~tmax+tmin+tmed+año+mes+horatmax_decimal+datos$horatmin_decimal+prec+velmedia+presMin+presMax+hrMedia, data=datos, pch = 16, cex = 0.5)
-modelo_mult <- lm(tmax ~ tmin + tmed + año + mes + horatmax_decimal + datos$horatmin_decimal + prec + velmedia + presMin + presMax + hrMedia, data = datos)
+pairs(~tmax+tmin+año+mes+horatmax_decimal+horatmin_decimal+prec+velmedia+presMin+presMax+hrMedia, data=datos, pch = 16, cex = 0.5)
+modelo_mult <- lm(tmax ~ tmin + año + mes + horatmax_decimal + horatmin_decimal + prec + velmedia + presMin + presMax + hrMedia, data = datos)
 summary(modelo_mult)
 vif(modelo_mult)
 ```
 
 ```{r}
-pairs(~tmax+tmin+tmed+año+mes+horatmax_decimal+horatmin_decimal+prec+velmedia+presMin+presMax+hrMedia, data=datos, pch = 16, cex = 0.5)
-modelo_mult <- lm(tmax ~ tmin + tmed + año + mes + horatmax_decimal + horatmin_decimal + prec + velmedia + presMin + presMax + hrMedia, data = datos)
-summary(modelo_mult)
-vif(modelo_mult)
-```
-
-```{r}
-predictors <- c("tmax","tmin","tmed","año","mes","horatmax_decimal","horatmin_decimal","prec","velmedia","presMin","presMax","hrMedia")
+predictors <- c("tmax","tmin","año","mes","horatmax_decimal","horatmin_decimal","prec","velmedia","presMin","presMax","hrMedia")
 datos_complete <- datos[, predictors]
 datos_complete <- datos_complete[complete.cases(datos_complete), ]
-fit1 <- lm(tmax ~ tmin + tmed + año + horatmax_decimal + horatmin_decimal + prec + velmedia + presMin + presMax + hrMedia, data = datos_complete)
+fit1 <- lm(tmax ~ tmin  + año + horatmax_decimal + horatmin_decimal + prec + velmedia + presMin + presMax + hrMedia, data = datos_complete)
 fit2 <- lm(tmax ~ 1, data = datos_complete)
 modelAIC <- step(fit2, scope = list(lower=fit2, upper=fit1), direction="forward")
 formula <- formula(modelAIC)
@@ -410,24 +418,22 @@ boxplot(datos2$tmax, datos2$tmin,
         main = "Comparación de temperaturas máximas y mínimas en Pamplona")
 t.test(datos2$tmax, datos2$tmin, paired = TRUE)
 ```
-Hacer comparacion de los valores de las betas de las regresiones lineales de uno y otro
+(Hacer comparacion de los valores de las betas de las regresiones lineales de uno y otro)
 
 # Regresión lineal múltiple para predecir la temperatura máxima diaria en Pamplona
 ```{r}
 pairs(~tmax+tmin+tmed+año+mes+horatmax_decimal+horatmin_decimal+prec+velmedia+presMin+presMax+hrMedia, data=datos2, pch = 16, cex = 0.5)
-modelo_mult <- lm(tmax ~ tmin + tmed + año + mes + horatmax_decimal + horatmin_decimal + prec + velmedia + presMin + presMax + hrMedia, data = datos2)
+modelo_mult <- lm(tmax ~ tmin + año + mes + horatmax_decimal + horatmin_decimal + prec + velmedia + presMin + presMax + hrMedia, data = datos2)
 summary(modelo_mult)
 vif(modelo_mult)
 ```
 
 
 ```{r}
-
-
-predictors <- c("tmax","tmin","tmed","año","mes","horatmax_decimal","horatmin_decimal","prec","velmedia","presMin","presMax","hrMedia")
+predictors <- c("tmax","tmin","año","mes","horatmax_decimal","horatmin_decimal","prec","velmedia","presMin","presMax","hrMedia")
 datos_complete <- datos2[, predictors]
 datos_complete <- datos_complete[complete.cases(datos_complete), ]
-fit1 <- lm(tmax ~ tmin + tmed + año + horatmax_decimal + horatmin_decimal + prec + velmedia + presMin + presMax + hrMedia, data = datos_complete)
+fit1 <- lm(tmax ~ tmin + año + horatmax_decimal + horatmin_decimal + prec + velmedia + presMin + presMax + hrMedia, data = datos_complete)
 fit2 <- lm(tmax ~ 1, data = datos_complete)
 modelAIC <- step(fit2, scope = list(lower=fit2, upper=fit1), direction="forward")
 formula <- formula(modelAIC)
@@ -517,9 +523,8 @@ nuevo_inicial <- data.frame(
 pred_inicio <- predict(modelo_final, newdata = nuevo_inicial, interval = "prediction")
 pred_inicio
 ```
-(rellenar los datos con los que pone abajo)
-El modelo predice que la temperatura máxima podría aumentar %.2f grados para 2035 respecto al año inicial, con un intervalo de confianza entre %.2f y %.2f grados.\n
-pred2035[1] - pred_inicio[1], pred2035[2] - pred_inicio[2], pred2035[3] - pred_inicio[3]
+El modelo predice que la temperatura máxima podría aumentar 0.41 °C para 2035 respecto al año inicial, con un intervalo de confianza entre 0.40 °C y 0.41 °C
+
 
 Repitamos el proceso para Pamplona: 
 ```{r} 
@@ -538,9 +543,7 @@ nuevo_inicial2 <- data.frame(
 pred_inicio2 <- predict(modelo_final2, newdata = nuevo_inicial2, interval = "prediction")
 pred_inicio2
 ```
-El modelo predice que la temperatura máxima podría aumentar %.2f grados para 2035 respecto al año inicial, con un intervalo de confianza entre %.2f y %.2f grados.\n
-pred2035_2[1] - pred_inicio2[1], pred2035_2[2] - pred_inicio2[2], pred2035_2[3] - pred_inicio2[3]
-
+El modelo predice que la temperatura máxima podría aumentar 3.91 °C para 2035 respecto al año inicial, con un intervalo de confianza entre 3.91 °C y 3.92 °C.
 
 cd /workspaces/ProyectoAnalisis 
 R --vanilla --slave -e "rmarkdown::render('ProyectoAnálisis.Rmd')"
