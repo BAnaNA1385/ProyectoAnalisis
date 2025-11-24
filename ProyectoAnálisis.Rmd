@@ -1,15 +1,32 @@
 --- 
 title: "Proyecto Análisis"
-output:
-  html_document:
-    toc: true
-    toc_float: true     # Makes TOC a floating sidebar
-    toc_collapsed: false  # Keep TOC expanded
-    toc_depth: 3        # Adjust to show subheadings
+subtitle: "Evolución Climática"
 author: "Maddi Casaiz y Ana Díaz"
 date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    highlight: tango
+    code_folding: hide
+    css: estilo.css
 --- 
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+echo = TRUE,
+message = FALSE,
+warning = FALSE,
+fig.width = 7,
+fig.height = 4.5,
+fig.align = "center",
+dpi = 200
+)
+
+```
+
+<div class="franja-izquierda"></div>
 
 ```{r include=FALSE}
 library(sf)
