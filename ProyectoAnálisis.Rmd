@@ -7,7 +7,7 @@ output:
   html_document:
     theme: cosmo
     toc: true
-    toc_float: true
+    toc_float: false
     highlight: tango
     code_folding: hide
     css: estilo.css
@@ -26,7 +26,9 @@ dpi = 200
 
 ```
 
-<div class="franja-izquierda"></div>
+<div class="franja-izquierda">
+  <div id="toc-lateral"></div>
+</div>
 
 ```{r include=FALSE}
 library(sf)
@@ -38,7 +40,7 @@ library(readr)
 library(lubridate)
 library(car)
 ```
-cambio 
+
 # Análisis de datos meteorológicos de AEMET
 
 ```{r include=FALSE}
@@ -264,6 +266,7 @@ summary(modelo)
 ```
 Así, podemos concluir si el ritmo de calentamiento ha sido igual o distinto en cada estación.
 En este caso, el p-valor asociado al término de interacción (estacion: año) es menor que 0.05, lo que indica que hay diferencias significativas en la tendencia de calentamiento entre las estaciones del año. Por lo tanto, podemos concluir que el calentamiento no afecta a todas las estaciones por igual.
+
 ## Variabilidad por estaciones de hora de temperatura máxima
 Ahora vamos a ver si la hora a la que se alcanza la temperatura máxima ha cambiado a lo largo de los años en las distintas estaciones del año. Para ello ajustamos una regresión lineal para cada estación del año y representamos las rectas de regresión sobre el gráfico de dispersión de las horas de temperatura máxima frente al año.
 
@@ -568,6 +571,14 @@ El modelo predice que la temperatura máxima podría aumentar 3.91 °C para 2035
 
 # Conclusiones
 A modo de conclusion, el análisis confirma un calentamiento progresivo en ambas ciudades, más pronunciado en Pamplona (interior) que en San Sebastián (costa). Las temperaturas máximas aumentan más que las mínimas, y el calentamiento varía estacionalmente, siendo primavera y verano las más afectadas. Se observan cambios en los patrones horarios: la temperatura máxima ocurre más tarde en primavera/verano y más temprano en otoño/invierno. Las proyecciones indican una continuación de esta tendencia, con aumentos mayores en Pamplona. Estos resultados subrayan la necesidad de políticas de adaptación al cambio climático basadas en evidencias locales.
-cd /workspaces/ProyectoAnalisis 
-cd /workspaces/ProyectoAnalisis 
-R --vanilla --slave -e "rmarkdown::render('ProyectoAnálisis.Rmd')"
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var toc = document.getElementById("TOC");
+    var target = document.getElementById("toc-lateral");
+    if (toc && target) {
+        target.appendChild(toc);
+    }
+});
+</script>

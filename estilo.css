@@ -2,31 +2,35 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 180px;              /* ancho de la franja */
+  width: 260px;
   height: 100%;
-  background: linear-gradient(
-      to bottom,
-      #87CEEB,   /* azul cielo */
-      #BFEFFF    /* azul bebé */
-  );
-  z-index: 1;
+  padding: 20px;
+  background: linear-gradient(to bottom, #87CEEB, #BFEFFF);
+  z-index: 100;
+  overflow-y: auto;
 }
 
-/* Desplazar el contenido principal para que no se solape con la franja */
+/* Contenido principal desplazado */
 body {
-  margin-left: 200px;
+  margin-left: 280px !important;
 }
 
+/* Estilo del TOC */
+#toc-lateral #TOC {
+  font-size: 14px;
+  line-height: 1.4;
+}
 
-.logo-uni {
-  position: fixed;
-  top: 40px;
-  left: 20px;
-  width: 130px;
-  height: 130px;
-  background-image: url("logo.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-color: transparent;
-  z-index: 10;
+#toc-lateral ul {
+  list-style-type: none;
+  padding-left: 10px;
+}
+
+#toc-lateral a {
+  text-decoration: none;
+  color: #003366;
+}
+
+#toc-lateral a:hover {
+  text-decoration: underline;
 }
