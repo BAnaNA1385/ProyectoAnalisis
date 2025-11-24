@@ -1,0 +1,32 @@
+.franja-izquierda {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 180px;              /* ancho de la franja */
+  height: 100%;
+  background: linear-gradient(
+      to bottom,
+      #87CEEB,   /* azul cielo */
+      #BFEFFF    /* azul bebé */
+  );
+  z-index: 1;
+}
+
+/* Desplazar el contenido principal para que no se solape con la franja */
+body {
+  margin-left: 200px;
+}
+
+
+.logo-uni {
+  position: fixed;
+  top: 40px;
+  left: 20px;
+  width: 130px;
+  height: 130px;
+  background-image: url("logo.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  z-index: 10;
+}
