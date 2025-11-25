@@ -228,9 +228,13 @@ legend("topleft",
        pch = 16, 
        lty = 1)
 ```
-
+```{r}
+summary(modelo_tmed)$coefficients["año", ]
+summary(modelo_tmax)$coefficients["año", ]
+summary(modelo_tmin)$coefficients["año", ]
+```
+El análisis confirma aumentos estadísticamente significativos (p < 0.05) en todas las temperaturas: la máxima crece 0.057 °C/año (p = 0.0007), la media 0.048 °C/año (p = 0.002) y la mínima 0.039 °C/año (p = 0.009).
 De este gráfico y de los valores de los coeficientes de las pendientes, podemos observar que tanto las temperaturas máximas como las mínimas han aumentado a lo largo de los años, con la temperatura máxima mostrando un aumento más pronunciado en comparación con la mínima. Esto sugiere que el calentamiento global está afectando de manera más significativa a las temperaturas máximas diarias.
-
 
 
 # Relacion entre las medias de temperatura alta y baja
@@ -247,6 +251,32 @@ boxplot(datos$tmax, datos$tmin,
 t.test(datos$tmax, datos$tmin, paired = TRUE)
 ```
 El p-value del t-test nos indica si rechazamos o no la hipótesis nula. El p-valor es mucho menor que 0.05 (2.2e-16) por lo que rechazamos H0 y concluimos que hay una diferencia significativa entre las temperaturas máximas y mínimas diarias. Es decir, las temperaturas máximas y mínimas no aumentan de manera uniforme, lo que podría tener implicaciones importantes para la comprensión del impacto del cambio climático en los patrones de temperatura diaria.
+
+```{r}
+# Análisis de la amplitud térmica (diferencia tmax-tmin)
+datos$amplitud_termica <- datos$tmax - datos$tmin
+modelo_amplitud <- lm(amplitud_termica ~ fecha_num, data = datos)
+summary(modelo_amplitud)$coefficients["fecha_num", ]
+
+# Evolución de la amplitud térmica anual
+amplitud_anual <- aggregate(amplitud_termica ~ año, data = datos, mean)
+modelo_amplitud_anual <- lm(amplitud_termica ~ año, data = amplitud_anual)
+summary(modelo_amplitud_anual)$coefficients["año", ]
+
+```
+El análisis de la amplitud térmica (tmax - tmin) revela un aumento estadísticamente significativo de 0.0182 °C por año (p = 2.59e-06) en los datos diarios y de 0.0187 °C por año (p = 0.0017) en las medias anuales. Esta ampliación progresiva del rango térmico confirma que las temperaturas máximas aumentan 0.018 °C/año más rápido que las mínimas, patrón característico del calentamiento global observado.
+
+```{r}
+# Visualización de la amplitud térmica anual
+plot(amplitud_termica ~ año, data = amplitud_anual,
+     ylab = "Amplitud térmica (°C)", 
+     xlab = "Año",
+     main = "Evolución de la amplitud térmica anual",
+     pch = 16, col = "darkred")
+abline(modelo_amplitud_anual, col = "red", lwd = 2)
+```
+
+El gráfico muestra una clara tendencia ascendente en la amplitud térmica anual, confirmando visualmente el aumento estadístico de 0.0187°C por año
 
 # ¿El calentamiento afecta a todas las estaciones por igual?
 Para responder a esta pregunta, primero vamos a representar las temperaturas medias diarias por estaciones del año mediante un boxplot. Luego, realizaremos un análisis de varianza (ANOVA) para comparar las medias de las temperaturas entre las diferentes estaciones del año y ver si hay diferencias significativas.
