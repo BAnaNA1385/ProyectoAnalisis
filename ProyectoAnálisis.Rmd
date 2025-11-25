@@ -154,6 +154,7 @@ datos2 <- datos2[
 # Introduccion 
 
 La percepción generalizada de que los veranos son cada vez más cálidos y los patrones climáticos más extremos plantea cuestiones fundamentales. ¿Se trata de meras impresiones subjetivas o existe realmente una tendencia climática cuantificable? Este análisis aborda científicamente esta cuestión mediante el examen de datos meteorológicos históricos de AEMET. Buscamos determinar si las variaciones térmicas responden a patrones consistentes, evaluar el impacto diferenciado por estaciones y localizaciones geográficas, y desarrollar modelos predictivos que permitan anticipar escenarios futuros en el contexto del cambio climático actual.
+Los datos proceden de la Agencia Estatal de Meteorología (AEMET), con registros diarios de dos estaciones representativas del norte de España: San Sebastián (a 250 m de altitud) y Pamplona (a 459 m), abarcando el periodo 2000-2025. Esta selección es pertinente porque permite comparar la evolución climática en dos contextos geográficos contrastantes -costero versus interior- dentro de la misma región bioclimática, controlando así la variabilidad latitudinal mientras se examina el efecto de la continentalidad y altitud sobre las tendencias térmicas. El intervalo temporal de 25 años proporciona una base sólida para detectar tendencias significativas beyond la variabilidad interanual, esencial para estudios de cambio climático regional.
 
 # Evolución de las temperaturas a lo largo de los años
 
