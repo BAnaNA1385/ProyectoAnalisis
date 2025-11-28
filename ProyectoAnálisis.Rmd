@@ -368,6 +368,31 @@ modelo_mult <- lm(tmax ~ tmin + año + mes + horatmax_decimal + horatmin_decimal
 summary(modelo_mult)
 vif(modelo_mult)
 ```
+```{r}
+library(corrplot)
+
+# Calcular matriz de correlación y tomar valores absolutos
+m <- abs(cor(datos[, c("tmax","tmin","tmed","año","mes",
+                       "horatmax_decimal","horatmin_decimal",
+                       "prec","velmedia","presMin","presMax","hrMedia")],
+             use = "pairwise.complete.obs"))
+
+colores <- colorRampPalette(c("#D8ECFF", "#8CCBFF", "#3C8DFF", "#1A4D8F"))(100)
+
+corrplot(
+  m,
+  method = "color",
+  col = colores,
+  tl.col = "black",
+  tl.srt = 45,
+  number.cex = 0.65,
+  addCoef.col = "black",
+  cl.lim = c(0, 1),  # Límites fijos entre 0 y 1
+  type = "upper",
+  diag = FALSE,
+  is.corr = FALSE  # Importante: indicar que no es una matriz de correlación estándar
+)
+```
 
 ```{r}
 predictors <- c("tmax","tmin","año","mes","horatmax_decimal","horatmin_decimal","prec","velmedia","presMin","presMax","hrMedia")
@@ -470,7 +495,31 @@ modelo_mult <- lm(tmax ~ tmin + año + mes + horatmax_decimal + horatmin_decimal
 summary(modelo_mult)
 vif(modelo_mult)
 ```
+```{r}
+library(corrplot)
 
+# Calcular matriz de correlación y tomar valores absolutos
+m <- abs(cor(datos2[, c("tmax","tmin","tmed","año","mes",
+                       "horatmax_decimal","horatmin_decimal",
+                       "prec","velmedia","presMin","presMax","hrMedia")],
+             use = "pairwise.complete.obs"))
+
+colores <- colorRampPalette(c("#D8ECFF", "#8CCBFF", "#3C8DFF", "#1A4D8F"))(100)
+
+corrplot(
+  m,
+  method = "color",
+  col = colores,
+  tl.col = "black",
+  tl.srt = 45,
+  number.cex = 0.65,
+  addCoef.col = "black",
+  cl.lim = c(0, 1),  # Límites fijos entre 0 y 1
+  type = "upper",
+  diag = FALSE,
+  is.corr = FALSE  # Importante: indicar que no es una matriz de correlación estándar
+)
+```
 
 ```{r}
 predictors <- c("tmax","tmin","año","mes","horatmax_decimal","horatmin_decimal","prec","velmedia","presMin","presMax","hrMedia")
