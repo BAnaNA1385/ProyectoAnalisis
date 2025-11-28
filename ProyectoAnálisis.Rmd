@@ -238,20 +238,8 @@ De este gráfico y de los valores de los coeficientes de las pendientes, podemos
 
 
 # Relacion entre las medias de temperatura alta y baja
-Ya hemos visto que tanto las temperaturas máximas como las mínimas han aumentado a lo largo de los años. Ahora queremos ver si existe una relación significativa entre las temperaturas máximas y mínimas diarias. Esto lo lograremos mediante un boxplot comparativo y un test t-pareado.
-Como se tratan de datos pareados (las temperaturas máxima y mínima del mismo día), utilizaremos un test t-pareado para evaluar si hay una diferencia significativa entre las medias de las dos variables. La hipótesis nula (H0) es que no hay diferencia en las medias de tmax y tmin, mientras que la hipótesis alternativa (H1) es que sí hay una diferencia significativa.
-```{r}
-# Comparar visualmente tmax y tmin
-boxplot(datos$tmax, datos$tmin, 
-        names = c("Temp. Máxima", "Temp. Mínima"),
-        ylab = "Temperatura (°C)",
-        main = "Comparación de temperaturas máximas y mínimas")
 
-# Test t-pareado para verificar si hay diferencias significativas
-t.test(datos$tmax, datos$tmin, paired = TRUE)
-```
-El p-value del t-test nos indica si rechazamos o no la hipótesis nula. El p-valor es mucho menor que 0.05 (2.2e-16) por lo que rechazamos H0 y concluimos que hay una diferencia significativa entre las temperaturas máximas y mínimas diarias. Es decir, las temperaturas máximas y mínimas no aumentan de manera uniforme, lo que podría tener implicaciones importantes para la comprensión del impacto del cambio climático en los patrones de temperatura diaria.
-
+Para evaluar si las temperaturas máximas y mínimas están aumentando al mismo ritmo, analizamos la evolución de la amplitud térmica (diferencia entre tmax y tmin) a lo largo del tiempo. Si la amplitud térmica aumenta, indica que las temperaturas máximas están creciendo más rápido que las mínimas.
 ```{r}
 # Análisis de la amplitud térmica (diferencia tmax-tmin)
 datos$amplitud_termica <- datos$tmax - datos$tmin
